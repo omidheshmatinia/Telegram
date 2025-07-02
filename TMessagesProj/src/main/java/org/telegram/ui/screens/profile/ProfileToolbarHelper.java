@@ -19,6 +19,7 @@ import org.telegram.ui.Stories.ProfileStoriesView;
 public class ProfileToolbarHelper {
     public static int MAX_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(84);
     public static int MIN_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(42);
+    public static int FIRST_EXPANSION_HEIGHT_THRESH_HOLD = AndroidUtilities.dp(170f);
     public static final float TOOLBAR_TEXT_INITIAL_START_MARGIN = 64;
 
     private TextLayoutUpdateCallback textLayoutUpdateCallback;
