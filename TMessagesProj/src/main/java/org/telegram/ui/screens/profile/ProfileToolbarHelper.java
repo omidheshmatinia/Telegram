@@ -14,7 +14,6 @@ public class ProfileToolbarHelper {
     public void checkVideoCallAndCallVisibility(TLRPC.UserFull userInfo){
         if (userInfo != null && userInfo.phone_calls_available) {
             isCallItemVisible = true;
-//            isVideoCallItemVisible = Build.VERSION.SDK_INT >= 18 && userInfo.video_calls_available; //todo we can remove the sdk check
             isVideoCallItemVisible = userInfo.video_calls_available;
         }
     }
