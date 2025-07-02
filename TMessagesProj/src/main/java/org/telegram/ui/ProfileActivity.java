@@ -288,6 +288,8 @@ import org.telegram.ui.bots.BotWebViewAttachedSheet;
 import org.telegram.ui.bots.ChannelAffiliateProgramsFragment;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
 import org.telegram.ui.screens.profile.ProfileOverlaysView;
+import org.telegram.ui.screens.profile.ProfileToolbarButton;
+import org.telegram.ui.screens.profile.ProfileToolbarButtonsLayout;
 import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
 import java.io.BufferedInputStream;
@@ -4509,6 +4511,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 updateCollectibleHint();
             }
         };
+        profileToolbarHelper.setContainerReferences(avatarContainer, avatarContainer2);
         fallbackImage = new ImageReceiver(avatarContainer2);
         fallbackImage.setRoundRadius(AndroidUtilities.dp(11));
         AndroidUtilities.updateViewVisibilityAnimated(avatarContainer2, true, 1f, false);
@@ -4842,8 +4845,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         giftsView = new ProfileGiftsView(context, currentAccount, getDialogId(), avatarContainer, avatarImage, resourcesProvider);
         profileToolbarHelper.setGiftsView(giftsView);
         avatarContainer2.addView(giftsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider);
         updateProfileData(true);
-
         needLayout(false);
 
         listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -6947,7 +6950,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
                 updateCollectibleHint();
             } else if (extraHeight <= ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) {
-                profileToolbarHelper.handleExpansionInFirstStage(avatarContainer, timeItem, starBgItem, starFgItem, showStatusButton, mediaCounterTextView, diff, expandAnimator, actionBar);
+                profileToolbarHelper.handleExpansionInFirstStage(timeItem, starBgItem, starFgItem, showStatusButton, mediaCounterTextView, diff, expandAnimator, actionBar);
                 updateCollectibleHint();
             }
 

@@ -1,20 +1,26 @@
 package org.telegram.ui.screens.profile;
 
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.google.android.exoplayer2.util.Log;
 
+import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.SimpleTextView;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AudioPlayerAlert;
+import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stars.ProfileGiftsView;
 import org.telegram.ui.Stories.ProfileStoriesView;
+
+import java.util.ArrayList;
 
 public class ProfileToolbarHelper {
     public static int MAX_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(84);
@@ -25,6 +31,9 @@ public class ProfileToolbarHelper {
     private TextLayoutUpdateCallback textLayoutUpdateCallback;
     private ProfileStoriesView storyView;
     private ProfileGiftsView giftsView;
+    private FrameLayout avatarContainer;
+    private FrameLayout avatarContainer2;
+    private ProfileToolbarButtonsLayout toolbarButtonsLayout;
     private SimpleTextView[] nameTextView = new SimpleTextView[2];
     private SimpleTextView[] onlineTextView = new SimpleTextView[4];
 
@@ -40,7 +49,6 @@ public class ProfileToolbarHelper {
     }
 
     public void handleExpansionInFirstStage(
-            FrameLayout avatarContainer,
             ImageView timeItem,
             ImageView starBgItem,
             ImageView starFgItem,
@@ -111,6 +119,11 @@ public class ProfileToolbarHelper {
             nameTextView[a].setScaleX(nameScale);
             nameTextView[a].setScaleY(nameScale);
         }
+        if(toolbarButtonsLayout != null){
+            toolbarButtonsLayout.setY(AndroidUtilities.dp(100));
+            toolbarButtonsLayout.handleAnimation(diff);
+            Log.e("OMIDOMID","toolbarButtonsLayout > diff="+diff+"  height="+toolbarButtonsLayout.getHeight()+"  alpha="+toolbarButtonsLayout.getAlpha()+"   transY="+toolbarButtonsLayout.getTranslationY()+"    y="+toolbarButtonsLayout.getY());
+        }
         if (textLayoutUpdateCallback != null) {
             textLayoutUpdateCallback.onTextPositionUpdate(nameX, nameY, onlineX, onlineY);
             textLayoutUpdateCallback.onAvatarScaleUpdate(avatarScale, avatarY);
@@ -132,6 +145,24 @@ public class ProfileToolbarHelper {
 
     public void setGiftsView(ProfileGiftsView _giftsView) {
         giftsView = _giftsView;
+    }
+
+    public void setContainerReferences(FrameLayout _avatarContainer, FrameLayout _avatarContainer2) {
+        avatarContainer = _avatarContainer;
+        avatarContainer2 = _avatarContainer2;
+    }
+
+    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider){
+        toolbarButtonsLayout = new ProfileToolbarButtonsLayout(context);
+        toolbarButtonsLayout.setResourceProvider(resourcesProvider);
+        avatarContainer2.addView(toolbarButtonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, AndroidUtilities.dp(80)));
+        ArrayList<ProfileToolbarButton> items = new ArrayList<>();
+        items.add(new ProfileToolbarButton(R.drawable.filled_message, "Message"));
+        items.add(new ProfileToolbarButton(R.drawable.filled_unmute, "Unmute"));
+        items.add(new ProfileToolbarButton(R.drawable.filled_call, "Call"));
+        items.add(new ProfileToolbarButton(R.drawable.filled_video, "Video"));
+        toolbarButtonsLayout.setItems(items);
+        toolbarButtonsLayout.setAlpha(0f);
     }
 
     public interface TextLayoutUpdateCallback {
