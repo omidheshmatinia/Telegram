@@ -34,6 +34,9 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Rect blurBounds = new Rect();
 
+    private SimpleTextView label;
+    private ImageView icon;
+
     public ProfileToolbarButtonLayout(@NonNull Context context, SizeNotifierFrameLayout sizeNotifierFrameLayout, ProfileToolbarButtonItem item) {
         super(context, sizeNotifierFrameLayout);
         setClipChildren(false);
@@ -77,12 +80,12 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
         vParams.topMargin = AndroidUtilities.dp(6);
         vParams.bottomMargin = AndroidUtilities.dp(6);
         vertical.setLayoutParams(vParams);
-        ImageView icon = new ImageView(getContext());
+        icon = new ImageView(getContext());
         icon.setImageResource(buttonInfo.icon);
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(ICON_SIZE, ICON_SIZE);
         iconParams.gravity = Gravity.CENTER_HORIZONTAL;
         vertical.addView(icon, iconParams);
-        SimpleTextView label = new SimpleTextView(getContext());
+        label = new SimpleTextView(getContext());
         label.setText(buttonInfo.label);
         label.setTextColor(Color.WHITE);
         label.setTextSize(12);
@@ -94,5 +97,14 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
         textParams.topMargin = AndroidUtilities.dp(4);
         vertical.addView(label, textParams);
         return vertical;
+    }
+
+    public void handleAnimation(float progress) {
+        if(label != null && icon != null){
+            icon.setScaleX(progress);
+            icon.setScaleY(progress);
+            label.setScaleX(progress);
+            label.setScaleY(progress);
+        }
     }
 }

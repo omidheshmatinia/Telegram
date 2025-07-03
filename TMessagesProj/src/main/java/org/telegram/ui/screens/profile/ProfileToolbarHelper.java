@@ -26,8 +26,9 @@ import java.util.ArrayList;
 public class ProfileToolbarHelper {
     public static int MAX_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(84);
     public static int MIN_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(42);
-    public static int FIRST_EXPANSION_HEIGHT_THRESH_HOLD = AndroidUtilities.dp(170f);
+    public static int FIRST_EXPANSION_HEIGHT_THRESH_HOLD = AndroidUtilities.dp(196f);
     public static final float TOOLBAR_TEXT_INITIAL_START_MARGIN = 64;
+    public static float NAME_SCALE_FIRST_EXPANSION = 1.12f;
 
     private TextLayoutUpdateCallback textLayoutUpdateCallback;
     private ProfileStoriesView storyView;
@@ -55,10 +56,12 @@ public class ProfileToolbarHelper {
             ImageView starFgItem,
             ProfileActivity.ShowDrawable showStatusButton,
             AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView,
-            float diff,
+            float progress,
             ValueAnimator expandAnimator,
-            ActionBar actionBar
+            ActionBar actionBar,
+            float toolbarHeight
     ) {
+        final float textFirstMoveThreshHold = 0.4f;
         float nameX = 0;
         float onlineX = 0;
         if (storyView != null) {
@@ -67,11 +70,22 @@ public class ProfileToolbarHelper {
         if (giftsView != null) {
             giftsView.invalidate();
         }
+
+        if (toolbarButtonsLayout != null) {
+            toolbarButtonsLayout.handleAnimation(progress, toolbarHeight, textFirstMoveThreshHold);
+        }
+        float diff = 0f;
+        // text should move after button is expanded
+        if(progress > textFirstMoveThreshHold) {
+            float mapped = (progress - textFirstMoveThreshHold) / (1-textFirstMoveThreshHold);
+            mapped = Math.max(0f, Math.min(1f, mapped));
+            diff = AndroidUtilities.lerp(0f, 1f, mapped);
+        }
         float avatarScale = (float) AndroidUtilities.lerp(MIN_PROFILE_IMAGE_CIRCLE_SIZE, MAX_PROFILE_IMAGE_CIRCLE_SIZE, diff) / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
         float imageSize = (MIN_PROFILE_IMAGE_CIRCLE_SIZE * avatarScale);
         float avatarYExpandedHeight = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight() / 2.0f - (MIN_PROFILE_IMAGE_CIRCLE_SIZE / 2) + actionBar.getTranslationY();
         float avatarY = AndroidUtilities.lerp(-MIN_PROFILE_IMAGE_CIRCLE_SIZE, avatarYExpandedHeight + (MIN_PROFILE_IMAGE_CIRCLE_SIZE / 2), diff);
-        float nameScale = 1.0f + 0.12f * diff;
+        float nameScale = AndroidUtilities.lerp(1f, NAME_SCALE_FIRST_EXPANSION, diff);
         if (expandAnimator == null || !expandAnimator.isRunning()) {
             avatarContainer.setScaleX(avatarScale);
             avatarContainer.setScaleY(avatarScale);
@@ -120,11 +134,6 @@ public class ProfileToolbarHelper {
             nameTextView[a].setScaleX(nameScale);
             nameTextView[a].setScaleY(nameScale);
         }
-        if(toolbarButtonsLayout != null){
-            toolbarButtonsLayout.setY(AndroidUtilities.dp(100));
-            toolbarButtonsLayout.handleAnimation(diff);
-            Log.e("OMIDOMID","toolbarButtonsLayout > diff="+diff+"  height="+toolbarButtonsLayout.getHeight()+"  alpha="+toolbarButtonsLayout.getAlpha()+"   transY="+toolbarButtonsLayout.getTranslationY()+"    y="+toolbarButtonsLayout.getY());
-        }
         if (textLayoutUpdateCallback != null) {
             textLayoutUpdateCallback.onTextPositionUpdate(nameX, nameY, onlineX, onlineY);
             textLayoutUpdateCallback.onAvatarScaleUpdate(avatarScale, avatarY);
@@ -155,7 +164,7 @@ public class ProfileToolbarHelper {
 
     public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView){
         toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView ,resourcesProvider);
-        masterView.addView(toolbarButtonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
         items.add(new ProfileToolbarButtonItem(R.drawable.filled_message, "Message"));
         items.add(new ProfileToolbarButtonItem(R.drawable.filled_unmute, "Unmute"));

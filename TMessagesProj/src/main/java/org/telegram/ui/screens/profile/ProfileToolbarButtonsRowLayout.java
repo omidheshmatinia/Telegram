@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -25,8 +27,9 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
     private Theme.ResourcesProvider resourceProvider;
     private final int HORIZONTAL_SPACING = 12;
     private final int MIDDLE_SPACE = 6;
-    private final int BUTTON_HEIGHT = AndroidUtilities.dp(64);
-    private final int VERTICAL_SPACING = AndroidUtilities.dp(12);
+    private static final int BUTTON_HEIGHT = AndroidUtilities.dp(64);
+    private static final int VERTICAL_SPACING = AndroidUtilities.dp(12);
+    public static final int FULL_HEIGHT = BUTTON_HEIGHT + VERTICAL_SPACING * 2;
     private final Paint backgroundPaint = new Paint();
     private final Rect blurBounds = new Rect();
 
@@ -38,9 +41,11 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
         setClipToPadding(false);
         setClipChildren(false);
         backgroundPaint.setColor(0x20ffffff);
-        // todo here no need to have background,
-        // we add to see the blur
-        // should be add to avatar container to see the blur for image based on animation
+        /**
+         todo here no need to have background,
+         we add to see the blur
+         should be add to avatar container to see the blur for image based on animation
+         */
         int color = Theme.getColor(Theme.key_windowBackgroundWhite, resourceProvider);
         setBackgroundColor(color);
     }
@@ -75,9 +80,32 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
         parentNotifier.drawBlurRect(canvas, 0, blurBounds, backgroundPaint, true);
     }
 
-    public void handleAnimation(float progress) {
-        ViewGroup.LayoutParams params = getLayoutParams();
-        params.height = AndroidUtilities.lerp(0, BUTTON_HEIGHT + VERTICAL_SPACING * 2, progress);
-        setAlpha(progress);
+    public void handleAnimation(float progress, float toolbarHeight, float threshold) {
+        final float threshHoldGap = threshold + 0.03f; //text should start earlier before this scale.   after this thresh hold, it should not scale anymore or alpha change
+        float mapped = progress / threshHoldGap;
+        mapped = Math.max(0f, Math.min(1f, mapped));
+        float diff = AndroidUtilities.lerp(0f, 1f, mapped);
+
+        setScaleY(diff);
+        float scaledHeight = FULL_HEIGHT * diff;
+        setTranslationY(toolbarHeight + (FULL_HEIGHT - scaledHeight) / 2);
+        setAlpha(diff);
+
+        //todo OMID : child animation can be better. it is better that we change the height of bigger button and jsut scale the childs. now the childs skewed
+        scaleChildren(diff);
+    }
+
+    /**
+     * handle scale animation for each child button
+     * @param progress (between 0 and 1)
+     */
+    private void scaleChildren(float progress) {
+       int childCount = getChildCount();
+        for (int a = 0; a < childCount; a++) {
+            View child = getChildAt(a);
+            if(child instanceof ProfileToolbarButtonLayout){
+                ((ProfileToolbarButtonLayout) child).handleAnimation(progress);
+            }
+        }
     }
 }
