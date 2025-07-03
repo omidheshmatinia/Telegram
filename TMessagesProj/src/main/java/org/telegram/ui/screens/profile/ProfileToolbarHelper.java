@@ -34,7 +34,7 @@ public class ProfileToolbarHelper {
     private ProfileGiftsView giftsView;
     private FrameLayout avatarContainer;
     private FrameLayout avatarContainer2;
-    private ProfileToolbarButtonsLayout toolbarButtonsLayout;
+    private ProfileToolbarButtonsRowLayout toolbarButtonsLayout;
     private SimpleTextView[] nameTextView = new SimpleTextView[2];
     private SimpleTextView[] onlineTextView = new SimpleTextView[4];
 
@@ -154,7 +154,7 @@ public class ProfileToolbarHelper {
     }
 
     public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView){
-        toolbarButtonsLayout = new ProfileToolbarButtonsLayout(context, masterView ,resourcesProvider);
+        toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView ,resourcesProvider);
         masterView.addView(toolbarButtonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
         items.add(new ProfileToolbarButtonItem(R.drawable.filled_message, "Message"));
