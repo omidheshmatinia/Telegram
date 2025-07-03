@@ -110,7 +110,6 @@ import androidx.core.math.MathUtils;
 import androidx.core.view.NestedScrollingParent3;
 import androidx.core.view.NestedScrollingParentHelper;
 import androidx.core.view.ViewCompat;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -522,18 +521,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int add_member = 18;
     private final static int statistics = 19;
     private final static int start_secret_chat = 20;
-    private final static int gallery_menu_save = 21;
+    public final static int gallery_menu_save = 21;
     private final static int view_discussion = 22;
     private final static int delete_topic = 23;
     private final static int report = 24;
 
     private final static int edit_info = 30;
-    private final static int logout = 31;
+    public final static int logout = 31;
     private final static int search_button = 32;
-    private final static int set_as_main = 33;
-    private final static int edit_avatar = 34;
-    private final static int delete_avatar = 35;
-    private final static int add_photo = 36;
+    public final static int set_as_main = 33;
+    public final static int edit_avatar = 34;
+    public final static int delete_avatar = 35;
+    public final static int add_photo = 36;
     private final static int gift_premium = 38;
     private final static int channel_stories = 39;
     private final static int edit_color = 40;
@@ -686,7 +685,62 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     HashSet<Integer> notificationsExceptionTopics = new HashSet<>();
 
     private CharacterStyle loadingSpan;
-    private ProfileToolbarHelper profileToolbarHelper = new ProfileToolbarHelper();
+    private final ProfileToolbarHelper profileToolbarHelper = new ProfileToolbarHelper(new ProfileToolbarHelper.ProfileActivityReferenceCallback() {
+        @Override
+        public AvatarImageView getAvatarImage() {
+            return avatarImage;
+        }
+
+        @Override
+        public FrameLayout getAvatarContainer() {
+            return avatarContainer;
+        }
+
+        @Override
+        public NestedSizeNotifierLayout getAvatarContainer2() {
+            return avatarContainer2;
+        }
+
+        @Override
+        public RecyclerListView getListView() {
+            return listView;
+        }
+
+        @Override
+        public ProfileStoriesView getStoryView() {
+            return storyView;
+        }
+
+        @Override
+        public ProfileGiftsView getGiftsView() {
+            return giftsView;
+        }
+
+        @Override
+        public ProfileGalleryView getAvatarsViewPager() {
+            return avatarsViewPager;
+        }
+
+        @Override
+        public ProfileOverlaysView getOverlaysView() {
+            return overlaysView;
+        }
+
+        @Override
+        public PagerIndicatorView getIndicatorView() {
+            return avatarsViewPagerIndicatorView;
+        }
+
+        @Override
+        public int getPageThemedColor(int key) {
+            return getThemedColor(key);
+        }
+
+        @Override
+        public AudioPlayerAlert.ClippingTextViewSwitcher getMediaCounterTextView() {
+            return mediaCounterTextView;
+        }
+    });
 
     private final Property<ProfileActivity, Float> HEADER_SHADOW = new AnimationProperties.FloatProperty<ProfileActivity>("headerShadow") {
         @Override
@@ -1298,7 +1352,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
-    private class PagerIndicatorView extends View {
+    public class PagerIndicatorView extends View {
 
         private final RectF indicatorRect = new RectF();
 
@@ -1512,7 +1566,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
     @Override
     public boolean onFragmentCreate() {
-        profileToolbarHelper.setTextLayoutUpdateCallback(new org.telegram.ui.screens.profile.ProfileToolbarHelper.TextLayoutUpdateCallback() {
+        profileToolbarHelper.setTextLayoutUpdateCallback(new ProfileToolbarHelper.ToolbarLayoutUpdateCallback() {
             @Override
             public void onTextPositionUpdate(float _nameX, float _nameY, float _onlineX, float _onlineY) {
                 nameX = _nameX;
@@ -1526,6 +1580,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 avatarScale = _avatarScale;
                 avatarY = _avatarY;
             }
+
+            @Override
+            public void shouldUpdateCollectibleHint() {
+                updateCollectibleHint();
+            }
+
         });
         profileToolbarHelper.setReferences(
                 nameTextView,
@@ -2394,7 +2454,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             updateProfileData(false);
                         }
                         if (avatarsViewPager.getRealCount() == 1) {
-                            setForegroundImage(true);
+                            profileToolbarHelper.setAvatarForegroundImage(true);
                         }
                         if (photo == null || avatarsViewPager.getRealPosition() == 0) {
                             TLRPC.Photo nextPhoto = avatarsViewPager.getPhoto(1);
@@ -4521,7 +4581,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 updateCollectibleHint();
             }
         };
-        profileToolbarHelper.setContainerReferences(avatarContainer, avatarContainer2);
         fallbackImage = new ImageReceiver(avatarContainer2);
         fallbackImage.setRoundRadius(AndroidUtilities.dp(11));
         AndroidUtilities.updateViewVisibilityAnimated(avatarContainer2, true, 1f, false);
@@ -4841,7 +4900,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 openAvatar();
             }
         };
-        profileToolbarHelper.setStoryView(storyView);
         updateStoriesViewBounds(false);
         if (userInfo != null) {
             storyView.setStories(userInfo.stories);
@@ -4853,7 +4911,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         avatarContainer2.addView(storyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         giftsView = new ProfileGiftsView(context, currentAccount, getDialogId(), avatarContainer, avatarImage, resourcesProvider);
-        profileToolbarHelper.setGiftsView(giftsView);
         avatarContainer2.addView(giftsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
         updateProfileData(true);
@@ -6747,156 +6804,32 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
             float h = openAnimationInProgress ? initialAnimationExtraHeight : extraHeight;
             if (h > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD || isPulledDown) {
-                Log.e("OMDProgress","h > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD || isPulledDown >>>> h="+h+"  isPulledDown="+isPulledDown+"  ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD="+ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD);
+                Log.e("OMDProgress","Second Expansion");
                 expandProgress = Math.max(0f, Math.min(1f, (h - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) / (listView.getMeasuredWidth() - newTop - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD)));
-                avatarScale = AndroidUtilities.lerp((42f + 18f) / 42f, (42f + 42f + 18f) / 42f, Math.min(1f, expandProgress * 3f));
-                if (storyView != null) {
-                    storyView.invalidate();
-                }
-                if (giftsView != null) {
-                    giftsView.invalidate();
-                }
-
-                final float durationFactor = Math.min(AndroidUtilities.dpf2(2000f), Math.max(AndroidUtilities.dpf2(1100f), Math.abs(listViewVelocityY))) / AndroidUtilities.dpf2(1100f);
-
-                if (allowPullingDown && (openingAvatar || expandProgress >= 0.33f)) {
-                    if (!isPulledDown) {
-                        if (otherItem != null) {
-                            if (!getMessagesController().isChatNoForwards(currentChat)) {
-                                otherItem.showSubItem(gallery_menu_save);
-                            } else {
-                                otherItem.hideSubItem(gallery_menu_save);
-                            }
-                            if (imageUpdater != null) {
-                                otherItem.showSubItem(add_photo);
-                                otherItem.showSubItem(edit_avatar);
-                                otherItem.showSubItem(delete_avatar);
-                                otherItem.hideSubItem(set_as_main);
-                                otherItem.hideSubItem(logout);
-                            }
-                        }
-                        if (searchItem != null) {
-                            searchItem.setEnabled(false);
-                        }
-                        isPulledDown = true;
-                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
-                        overlaysView.setOverlaysVisible(true, durationFactor);
-                        avatarsViewPagerIndicatorView.refreshVisibility(durationFactor);
-                        avatarsViewPager.setCreateThumbFromParent(true);
-                        avatarsViewPager.getAdapter().notifyDataSetChanged();
-                        expandAnimator.cancel();
-                        float value = AndroidUtilities.lerp(expandAnimatorValues, currentExpanAnimatorFracture);
-                        expandAnimatorValues[0] = value;
-                        expandAnimatorValues[1] = 1f;
-                        if (storyView != null && !storyView.isEmpty()) {
-                            expandAnimator.setInterpolator(new FastOutSlowInInterpolator());
-                            expandAnimator.setDuration((long) ((1f - value) * 1.3f * 250f / durationFactor));
-                        } else {
-                            expandAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
-                            expandAnimator.setDuration((long) ((1f - value) * 250f / durationFactor));
-                        }
-                        expandAnimator.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                setForegroundImage(false);
-                                avatarsViewPager.setAnimatedFileMaybe(avatarImage.getImageReceiver().getAnimation());
-                                avatarsViewPager.resetCurrentItem();
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                expandAnimator.removeListener(this);
-                                topView.setBackgroundColor(Color.BLACK);
-                                avatarContainer.setVisibility(View.GONE);
-                                avatarsViewPager.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        expandAnimator.start();
-                    }
-                    ViewGroup.LayoutParams params = avatarsViewPager.getLayoutParams();
-                    params.width = listView.getMeasuredWidth();
-                    params.height = (int) (h + newTop);
-                    avatarsViewPager.requestLayout();
-                    if (!expandAnimator.isRunning()) {
-                        float additionalTranslationY = 0;
-                        if (openAnimationInProgress && playProfileAnimation == 2) {
-                            additionalTranslationY = -(1.0f - avatarAnimationProgress) * AndroidUtilities.dp(50);
-                        }
-                        onlineX = AndroidUtilities.dpf2(16f) - onlineTextView[1].getLeft();
-                        nameTextView[1].setTranslationX(AndroidUtilities.dpf2(18f) - nameTextView[1].getLeft());
-                        nameTextView[1].setTranslationY(newTop + h - AndroidUtilities.dpf2(38f) - nameTextView[1].getBottom() + additionalTranslationY);
-                        onlineTextView[1].setTranslationX(onlineX + customPhotoOffset);
-                        onlineTextView[1].setTranslationY(newTop + h - AndroidUtilities.dpf2(18f) - onlineTextView[1].getBottom() + additionalTranslationY);
-                        mediaCounterTextView.setTranslationX(onlineTextView[1].getTranslationX());
-                        mediaCounterTextView.setTranslationY(onlineTextView[1].getTranslationY());
-                        updateCollectibleHint();
-                    }
-                } else {
-                    if (isPulledDown) {
-                        isPulledDown = false;
-                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
-                        if (otherItem != null) {
-                            otherItem.hideSubItem(gallery_menu_save);
-                            if (imageUpdater != null) {
-                                otherItem.hideSubItem(set_as_main);
-                                otherItem.hideSubItem(edit_avatar);
-                                otherItem.hideSubItem(delete_avatar);
-                                otherItem.showSubItem(add_photo);
-                                otherItem.showSubItem(logout);
-//                                otherItem.showSubItem(edit_name);
-                            }
-                        }
-                        if (searchItem != null) {
-                            searchItem.setEnabled(!scrolling);
-                        }
-                        overlaysView.setOverlaysVisible(false, durationFactor);
-                        avatarsViewPagerIndicatorView.refreshVisibility(durationFactor);
-                        expandAnimator.cancel();
-                        avatarImage.getImageReceiver().setAllowStartAnimation(true);
-                        avatarImage.getImageReceiver().startAnimation();
-
-                        float value = AndroidUtilities.lerp(expandAnimatorValues, currentExpanAnimatorFracture);
-                        expandAnimatorValues[0] = value;
-                        expandAnimatorValues[1] = 0f;
-                        expandAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
-                        if (!isInLandscapeMode) {
-                            expandAnimator.setDuration((long) (value * 250f / durationFactor));
-                        } else {
-                            expandAnimator.setDuration(0);
-                        }
-                        topView.setBackgroundColor(getThemedColor(Theme.key_avatar_backgroundActionBarBlue));
-
-                        if (!doNotSetForeground) {
-                            BackupImageView imageView = avatarsViewPager.getCurrentItemView();
-                            if (imageView != null) {
-                                if (imageView.getImageReceiver().getDrawable() instanceof VectorAvatarThumbDrawable) {
-                                    avatarImage.drawForeground(false);
-                                } else {
-                                    avatarImage.drawForeground(true);
-                                    avatarImage.setForegroundImageDrawable(imageView.getImageReceiver().getDrawableSafe());
-                                }
-                            }
-                        }
-                        avatarImage.setForegroundAlpha(1f);
-                        avatarContainer.setVisibility(View.VISIBLE);
-                        avatarsViewPager.setVisibility(View.GONE);
-                        expandAnimator.start();
-                    }
-
-                    avatarContainer.setScaleX(avatarScale);
-                    avatarContainer.setScaleY(avatarScale);
-
-                    if (expandAnimator == null || !expandAnimator.isRunning()) {
-                        refreshNameAndOnlineXY();
-                        nameTextView[1].setTranslationX(nameX);
-                        nameTextView[1].setTranslationY(nameY);
-                        onlineTextView[1].setTranslationX(onlineX + customPhotoOffset);
-                        onlineTextView[1].setTranslationY(onlineY);
-                        mediaCounterTextView.setTranslationX(onlineX);
-                        mediaCounterTextView.setTranslationY(onlineY);
-                        updateCollectibleHint();
-                    }
-                }
+                isPulledDown = profileToolbarHelper.handleExpansionInSecondStage(
+                        expandProgress,
+                        allowPullingDown,
+                        isPulledDown,
+                        expandAnimator,
+                        topView,
+                        openingAvatar,
+                        doNotSetForeground,
+                        isInLandscapeMode,
+                        currentExpanAnimatorFracture,
+                        customPhotoOffset,
+                        scrolling,
+                        openAnimationInProgress,
+                        playProfileAnimation,
+                        otherItem,
+                        searchItem,
+                        avatarAnimationProgress,
+                        h,
+                        listViewVelocityY,
+                        getMessagesController().isChatNoForwards(currentChat),
+                        newTop,
+                        imageUpdater,
+                        expandAnimatorValues
+                );
             }
 
             if (openAnimationInProgress && playProfileAnimation == 2) {
@@ -6978,28 +6911,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         updateEmojiStatusEffectPosition();
-    }
-
-    private void setForegroundImage(boolean secondParent) {
-        Drawable drawable = avatarImage.getImageReceiver().getDrawable();
-        if (drawable instanceof VectorAvatarThumbDrawable) {
-            avatarImage.setForegroundImage(null, null, drawable);
-        } else if (drawable instanceof AnimatedFileDrawable) {
-            AnimatedFileDrawable fileDrawable = (AnimatedFileDrawable) drawable;
-            avatarImage.setForegroundImage(null, null, fileDrawable);
-            if (secondParent) {
-                fileDrawable.addSecondParentView(avatarImage);
-            }
-        } else {
-            ImageLocation location = avatarsViewPager.getImageLocation(0);
-            String filter;
-            if (location != null && location.imageType == FileLoader.IMAGE_TYPE_ANIMATION) {
-                filter = "avatar";
-            } else {
-                filter = null;
-            }
-            avatarImage.setForegroundImage(location, filter, drawable);
-        }
     }
 
     private void refreshNameAndOnlineXY() {
