@@ -1,68 +1,53 @@
 package org.telegram.ui.screens.profile;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+
+import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
-import org.telegram.messenger.SvgHelper;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BluredView;
-import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.SizeNotifierFrameLayout;
 
 import java.util.List;
 
 public class ProfileToolbarButtonsLayout extends LinearLayout {
 
-    private Theme.ResourcesProvider resourcesProvider;
+    private SizeNotifierFrameLayout parentNotifier;
+    private Theme.ResourcesProvider resourceProvider;
 
-    public ProfileToolbarButtonsLayout(Context context) {
+
+    public ProfileToolbarButtonsLayout(Context context, SizeNotifierFrameLayout _parentNotifier,Theme.ResourcesProvider _resourcesProvider) {
         super(context);
-        init();
-    }
+        parentNotifier = _parentNotifier;
+        resourceProvider= _resourcesProvider;
 
-    public ProfileToolbarButtonsLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    private void init() {
         setOrientation(HORIZONTAL);
         setClipToPadding(false);
         setClipChildren(false);
+        int color = Theme.getColor(Theme.key_windowBackgroundWhite, resourceProvider);
+        setBackgroundColor(0XFFFFFFFF);
     }
 
-    public void setResourceProvider(Theme.ResourcesProvider _resourcesProvider){
-        resourcesProvider = _resourcesProvider;
-    }
-
-    public void setItems(List<ProfileToolbarButton> items) {
+    public void setItems(List<ProfileToolbarButtonItem> items) {
         removeAllViews();
-        if (items == null || items.size() < 2 || items.size() > 5) return;
         int count = items.size();
         for (int i = 0; i < count; i++) {
-            ProfileToolbarButton item = items.get(i);
+            ProfileToolbarButtonItem item = items.get(i);
             FrameLayout frame = new FrameLayout(getContext());
-            // Add blurred background
-            if(resourcesProvider != null) {
-                BluredView blur = new BluredView(getContext(), this, resourcesProvider);
-                frame.addView(blur, new FrameLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                // Padding as border
-                int border = AndroidUtilities.dp(4);
-                frame.setPadding(border, border, border, border);
-            }
             // Vertical layout for icon and text
             LinearLayout vertical = new LinearLayout(getContext());
             vertical.setOrientation(VERTICAL);
@@ -95,6 +80,18 @@ public class ProfileToolbarButtonsLayout extends LinearLayout {
             params.leftMargin = i == 0 ? 0 : AndroidUtilities.dp(4);
             addView(frame, params);
         }
+    }
+
+
+    private Paint paint = new Paint();
+    private Rect blurBounds = new Rect();
+
+    @Override
+    protected void onDraw(@NonNull Canvas canvas) {
+//        int color = Theme.getColor(Theme.key_windowBackgroundWhite, resourceProvider);
+//        paint.setColor(color);
+        blurBounds.set(0, 0, getWidth(), getHeight());
+        parentNotifier.drawBlurRect(canvas, 0, blurBounds, paint, true);
     }
 
     public void handleAnimation(float progress){

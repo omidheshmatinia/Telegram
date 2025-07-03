@@ -16,6 +16,7 @@ import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AudioPlayerAlert;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stars.ProfileGiftsView;
 import org.telegram.ui.Stories.ProfileStoriesView;
@@ -152,17 +153,17 @@ public class ProfileToolbarHelper {
         avatarContainer2 = _avatarContainer2;
     }
 
-    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider){
-        toolbarButtonsLayout = new ProfileToolbarButtonsLayout(context);
-        toolbarButtonsLayout.setResourceProvider(resourcesProvider);
-        avatarContainer2.addView(toolbarButtonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, AndroidUtilities.dp(80)));
-        ArrayList<ProfileToolbarButton> items = new ArrayList<>();
-        items.add(new ProfileToolbarButton(R.drawable.filled_message, "Message"));
-        items.add(new ProfileToolbarButton(R.drawable.filled_unmute, "Unmute"));
-        items.add(new ProfileToolbarButton(R.drawable.filled_call, "Call"));
-        items.add(new ProfileToolbarButton(R.drawable.filled_video, "Video"));
+    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView){
+        toolbarButtonsLayout = new ProfileToolbarButtonsLayout(context, masterView ,resourcesProvider);
+        masterView.addView(toolbarButtonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
+        items.add(new ProfileToolbarButtonItem(R.drawable.filled_message, "Message"));
+        items.add(new ProfileToolbarButtonItem(R.drawable.filled_unmute, "Unmute"));
+        items.add(new ProfileToolbarButtonItem(R.drawable.filled_call, "Call"));
+        items.add(new ProfileToolbarButtonItem(R.drawable.filled_video, "Video"));
         toolbarButtonsLayout.setItems(items);
         toolbarButtonsLayout.setAlpha(0f);
+        masterView.blurBehindViews.add(toolbarButtonsLayout);
     }
 
     public interface TextLayoutUpdateCallback {

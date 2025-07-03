@@ -240,6 +240,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.MessagePrivateSeenView;
+import org.telegram.ui.Components.NestedSizeNotifierLayout;
 import org.telegram.ui.Components.Paint.PersistColorPalette;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
@@ -288,8 +289,6 @@ import org.telegram.ui.bots.BotWebViewAttachedSheet;
 import org.telegram.ui.bots.ChannelAffiliateProgramsFragment;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
 import org.telegram.ui.screens.profile.ProfileOverlaysView;
-import org.telegram.ui.screens.profile.ProfileToolbarButton;
-import org.telegram.ui.screens.profile.ProfileToolbarButtonsLayout;
 import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
 import java.io.BufferedInputStream;
@@ -357,7 +356,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
     private HintView fwdRestrictedHint;
     private FrameLayout avatarContainer;
-    private FrameLayout avatarContainer2;
+    private NestedSizeNotifierLayout avatarContainer2;
     private DrawerProfileCell.AnimatedStatusView animatedStatusView;
     private AvatarImageView avatarImage;
     private View avatarOverlay;
@@ -4432,9 +4431,20 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         animatedStatusView.setPivotY(AndroidUtilities.dp(30));
 
         avatarContainer = new FrameLayout(context);
-        avatarContainer2 = new FrameLayout(context) {
+        avatarContainer2 = new NestedSizeNotifierLayout(context) {
 
             CanvasButton canvasButton;
+
+            @Override
+            protected void drawList(Canvas blurCanvas, boolean top, ArrayList<IViewWithInvalidateCallback> views) {
+                if(avatarContainer == null) return;
+                blurCanvas.save();
+                avatarContainer.draw(blurCanvas);
+                if (views != null && avatarContainer instanceof SizeNotifierFrameLayout.IViewWithInvalidateCallback) {
+                    views.add((SizeNotifierFrameLayout.IViewWithInvalidateCallback) avatarContainer);
+                }
+                blurCanvas.restore();
+            }
 
             @Override
             protected void dispatchDraw(Canvas canvas) {
@@ -4845,7 +4855,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         giftsView = new ProfileGiftsView(context, currentAccount, getDialogId(), avatarContainer, avatarImage, resourcesProvider);
         profileToolbarHelper.setGiftsView(giftsView);
         avatarContainer2.addView(giftsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider);
+        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
         updateProfileData(true);
         needLayout(false);
 
