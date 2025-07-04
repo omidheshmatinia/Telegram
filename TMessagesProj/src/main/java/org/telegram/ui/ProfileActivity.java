@@ -732,6 +732,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         @Override
+        public ActionBar getActionBar() {
+            return actionBar;
+        }
+
+        @Override
         public int getPageThemedColor(int key) {
             return getThemedColor(key);
         }
@@ -6804,7 +6809,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
             float h = openAnimationInProgress ? initialAnimationExtraHeight : extraHeight;
             if (h > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD || isPulledDown) {
-                Log.e("OMDProgress","Second Expansion");
                 expandProgress = Math.max(0f, Math.min(1f, (h - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) / (listView.getMeasuredWidth() - newTop - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD)));
                 isPulledDown = profileToolbarHelper.handleExpansionInSecondStage(
                         expandProgress,
@@ -6828,7 +6832,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         getMessagesController().isChatNoForwards(currentChat),
                         newTop,
                         imageUpdater,
-                        expandAnimatorValues
+                        expandAnimatorValues,
+                        extraHeight
                 );
             }
 
@@ -6893,7 +6898,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
                 updateCollectibleHint();
             } else if (extraHeight <= ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) {
-                profileToolbarHelper.handleExpansionInFirstStage(timeItem, starBgItem, starFgItem, showStatusButton, mediaCounterTextView, diff, expandAnimator, actionBar, extraHeight);
+                profileToolbarHelper.handleExpansionInFirstStage(timeItem, starBgItem, starFgItem, showStatusButton, mediaCounterTextView, diff, expandAnimator, extraHeight);
                 updateCollectibleHint();
             }
 
