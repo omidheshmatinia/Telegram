@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.exoplayer2.util.Log;
 
+import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MessagesController;
@@ -456,6 +457,7 @@ public class ProfileToolbarHelper {
         final RecyclerListView listView = referenceCallback.getListView();
         final ActionBar actionBar = referenceCallback.getActionBar();
         if(view != null){
+            BotWebViewVibrationEffect.IMPACT_MEDIUM.vibrate();
             if (isFullyExpanded) {
                 final int actionBarHeight = ActionBar.getCurrentActionBarHeight() + (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0);
                 listView.smoothScrollBy(0, view.getTop() - listView.getMeasuredWidth() + actionBarHeight, CubicBezierInterpolator.EASE_OUT_QUINT);
