@@ -312,6 +312,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -4944,6 +4945,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         avatarContainer2.addView(storyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         giftsView = new ProfileGiftsView(context, currentAccount, getDialogId(), avatarContainer, avatarImage, resourcesProvider);
         avatarContainer2.addView(giftsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+              profileToolbarHelper.setupGifts();
+            }
+        });
         profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
         updateProfileData(true);
         needLayout(false);
@@ -6748,6 +6755,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             listView.setOverScrollMode(extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD && extraHeight < listView.getMeasuredWidth() - newTop ? View.OVER_SCROLL_NEVER : View.OVER_SCROLL_ALWAYS);
 
             avatarY = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight() / 2.0f * (1.0f + diff) - 21 * AndroidUtilities.density + 27 * AndroidUtilities.density * diff + actionBar.getTranslationY();
+//            avatarY = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight() / 2.0f * (1.0f + diff) - MAX_PROFILE_IMAGE_CIRCLE_SIZE/2.0f + actionBar.getTranslationY();
 
             float h = openAnimationInProgress ? initialAnimationExtraHeight : extraHeight;
             if (h > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD || isPulledDown) {
@@ -6775,6 +6783,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         expandAnimatorValues,
                         extraHeight
                 );
+
+                //                if(listViewFullExpandSnappingPoint < 0 && isPulledDown){
+//                    Log.e("OMID", "####2  BOOOOOOOOOOOOOMOOOOOOOOOOOOOOOOOOO");
+//                    if(!expandAnimator.isRunning()) {
+////                        isPulledDown = profileToolbarHelper.startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
+//                        isPulledDown = profileToolbarHelper.startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, getMessagesController().isChatNoForwards(currentChat));
+//                    }
+//                 } else {
+//
+//                }
             }
 
             if (openAnimationInProgress && playProfileAnimation == 2) {
@@ -12264,7 +12282,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                     }
                 }
-
                 AndroidUtilities.runOnUIThread(() -> {
                     if (!text.equals(lastSearchString)) {
                         return;

@@ -48,6 +48,7 @@ import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NestedSizeNotifierLayout;
 import org.telegram.ui.Components.ProfileGalleryView;
+import org.telegram.ui.Components.Rect;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ScamDrawable;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
@@ -97,6 +98,12 @@ public class ProfileToolbarHelper {
         }
     }
 
+    public void setupGifts(){
+        final Rect avatarRect = new Rect(0, 0, screenWidth , getNameEndYForPhase1());
+        referenceCallback.getGiftsView().update();
+        referenceCallback.getGiftsView().setGiftsViewBounds(avatarRect, screenWidth / 2, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2 + AndroidUtilities.statusBarHeight, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2);
+    }
+
     public void handleExpansionInFirstStage(
             ImageView timeItem,
             ImageView starBgItem,
@@ -121,7 +128,8 @@ public class ProfileToolbarHelper {
             storyView.invalidate();
         }
         if (giftsView != null) {
-            giftsView.invalidate();
+            giftsView.setExpandProgress(progress);
+            giftsView.setExpandCoords(toolbarHeight);
         }
 
         if (toolbarButtonsLayout != null) {
@@ -556,9 +564,6 @@ public class ProfileToolbarHelper {
         avatarImage.setRoundRadius((int) AndroidUtilities.lerp(referenceCallback.requestGetSmallAvatarRoundRadius(), 0f, value));
         if (storyView != null) {
             storyView.setExpandProgress(value);
-        }
-        if (giftsView != null) {
-            giftsView.setExpandProgress(value);
         }
         if (searchItem != null) {
             searchItem.setAlpha(1.0f - value);
