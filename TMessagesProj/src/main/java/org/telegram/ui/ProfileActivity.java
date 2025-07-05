@@ -767,12 +767,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         @Override
-        public void requestUpdateCurrentExpanAnimatorFracture(float progress, float _currentExpandAnimatorValue) {
-            currentExpanAnimatorFracture = progress;
-            currentExpandAnimatorValue = _currentExpandAnimatorValue;
-        }
-
-        @Override
         public void requestCheckPhotoDescriptionAlpha() {
             checkPhotoDescriptionAlpha();
         }
@@ -5007,6 +5001,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 updateStoriesViewBounds(false);
             }
         });
+        if (!isInLandscapeMode) {
+            expandAnimator.setDuration((long) (250f));
+        } else {
+            expandAnimator.setDuration((long) (1.3f * 250f));
+        }
         updateRowsIds();
 
         updateSelectedMediaTabText();
@@ -5340,14 +5339,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void setAvatarExpandProgress(float animatedFracture) {
+        currentExpanAnimatorFracture = animatedFracture;
+        currentExpandAnimatorValue = AndroidUtilities.lerp(expandAnimatorValues, animatedFracture);
         profileToolbarHelper.handleAutoExpandInThirdPhase(
-                animatedFracture,
+                currentExpandAnimatorValue,
                 extraHeight,
                 expandProgress,
                 avatarScale,
                 mediaHeaderAnimationProgress,
-                expandAnimatorValues,
                 actionBarBackgroundColor,
+                expandAnimator,
                 peerColor,
                 searchItem,
                 scamDrawable,
@@ -5362,7 +5363,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 return AndroidUtilities.dp(needInsetForStories() ? 11 : 16);
             }
         }
-        return ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2;
+        return MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2;
     }
 
     private void updateTtlIcon() {
@@ -6752,6 +6753,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (h > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD || isPulledDown) {
                 expandProgress = Math.max(0f, Math.min(1f, (h - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) / (listView.getMeasuredWidth() - newTop - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD)));
                 isPulledDown = profileToolbarHelper.handleExpansionInSecondStage(
+                        layoutManager,
                         expandProgress,
                         allowPullingDown,
                         isPulledDown,
@@ -6760,8 +6762,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         openingAvatar,
                         doNotSetForeground,
                         isInLandscapeMode,
-                        currentExpanAnimatorFracture,
-                        customPhotoOffset,
                         scrolling,
                         openAnimationInProgress,
                         playProfileAnimation,
@@ -6769,7 +6769,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         searchItem,
                         avatarAnimationProgress,
                         h,
-                        listViewVelocityY,
                         getMessagesController().isChatNoForwards(currentChat),
                         newTop,
                         imageUpdater,
@@ -6834,7 +6833,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 updateEmojiStatusDrawableColor(avatarAnimationProgress);
 
                 final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
-                params.width = params.height = (int) AndroidUtilities.lerp(ProfileToolbarHelper.MIN_PROFILE_IMAGE_CIRCLE_SIZE, (extraHeight + newTop) / avatarScale, avatarAnimationProgress);
+                params.width = params.height = (int) AndroidUtilities.lerp(MIN_PROFILE_IMAGE_CIRCLE_SIZE, (extraHeight + newTop) / avatarScale, avatarAnimationProgress);
                 avatarContainer.requestLayout();
 
                 updateCollectibleHint();
@@ -6844,7 +6843,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
 
             if (!openAnimationInProgress && (expandAnimator == null || !expandAnimator.isRunning())) {
-                Log.e("OMDProgress","#1    needLayoutText");
                 needLayoutText(diff);
             }
         }
@@ -7356,7 +7354,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             final TLRPC.User user = getMessagesController().getUser(userId);
             if (user != null && user.photo == null) {
                 if (extraHeight >= ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) {
-                    Log.e("ThirdPhase", "#5");
                     expandAnimator.cancel();
                     expandAnimatorValues[0] = 1f;
                     expandAnimatorValues[1] = 0f;
