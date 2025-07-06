@@ -232,14 +232,10 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
     private final ArrayList<GiftPosition> giftsPositions = new ArrayList<>();
     public final HashSet<Long> giftIds = new HashSet<>();
     public int maxCount;
-    public void setGiftsViewBounds(Rect _rect, int circleCenterX, int circleCenterY, int circleRadius){
+
+    public void setGiftsViewBounds(Rect _rect, int circleCenterX, int circleCenterY, int circleRadius) {
         giftsPositions.clear();
         giftsPositions.addAll(distributeItems(_rect, circleCenterX, circleCenterY, circleRadius));
-
-        for (int i = 0; i < giftsPositions.size(); ++i) {
-            GiftPosition pos = giftsPositions.get(i);
-            Log.e("OMID","gift "+i+" : x="+pos.x+"   y="+pos.y);
-        }
         invalidate();
     }
 
@@ -342,13 +338,19 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
     private class GiftPosition {
         public float x, y;
         final float rotation = -8f + 16f * new java.util.Random().nextFloat(); // between -8 to 8 degree
-        public GiftPosition(float x, float y) { this.x = x; this.y = y; }
+
+        public GiftPosition(float x, float y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 
 
     private List<GiftPosition> validPositions = new ArrayList<>();
+
     /**
      * use this method to distribute gifts so the y do not overlap
+     *
      * @param centerX
      * @param circleRadius
      * @return
@@ -389,7 +391,7 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
         }
         left.sort(Comparator.comparingDouble(pos -> Math.abs(pos.x - centerX)));
         right.sort(Comparator.comparingDouble(pos -> Math.abs(pos.x - centerX)));
-        // 3. Alternate assignment
+        // 3. Alternate assignment : one left, one right ...
         List<GiftPosition> result = new ArrayList<>();
         Random random = new java.util.Random();
         int l = 0, r = 0;
@@ -411,138 +413,42 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
 
     public final AnimatedFloat animatedCount = new AnimatedFloat(this, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
 
-//    Paint TestPaint = new Paint();
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
         if (gifts.isEmpty() || giftsPositions.isEmpty() || expandProgress > 1.0f) return;
 
 //        TestPaint.setColor(Theme.getColor(Theme.key_avatar_nameInMessageRed));
 
-        final float ax = avatarContainer.getX();
-        final float ay = avatarContainer.getY();
-        final float aw = (avatarContainer.getWidth()) * avatarContainer.getScaleX();
-        final float ah = (avatarContainer.getHeight()) * avatarContainer.getScaleY();
+        final float avatarCenterX = avatarContainer.getX() + (avatarContainer.getWidth() * avatarContainer.getScaleX() / 2);
+        final float avatarCenterY = avatarContainer.getY() + (avatarContainer.getHeight() * avatarContainer.getScaleY() / 2);
 
         canvas.save();
         canvas.clipRect(0, 0, getWidth(), expandY); //todo expand y logic should improve
 
-//        for (int i = 0; i < validPositions.size(); ++i) {
-//            GiftPosition pos = validPositions.get(i);
-//            canvas.drawRect(pos.x, pos.y, pos.x + GIFT_BOUND_SIZE, pos.y + GIFT_BOUND_SIZE, TestPaint);
-//        }
-        final float acx = ax + aw / 2.0f;
-        final float cacx = Math.min(acx, dp(48));
-        final float acy = ay + ah / 2.0f;
-        final float ar = Math.min(aw, ah) / 2.0f + dp(6);
-        final float cx = getWidth() / 2.0f;
+        final float stagger = 0.1f; // delay between each gift item to start moving
+        final int count = Math.min(giftsPositions.size(), gifts.size());
+        final float maxOffset = (count - 1) * stagger;
 
-        Log.e("GiftView", "cx=" + cx + "  ar=" + ar + "   acy=" + acy + "   cacx=" + cacx + "  acx=" + acx + "   expandY=" + expandY + "  ax=" + ax + "   aw=" + aw + "   ah=" + ah + "   ay=" + ay);
-        for (int i = 0; i < Math.min(giftsPositions.size(), gifts.size()); ++i) {
-            final float scale = lerp((i+1) * 0.1f, 1.0f, expandProgress * 1.3f);
+        for (int i = 0; i < count; ++i) {
+
+            float giftProgress = (expandProgress - i * stagger) / (1.0f - maxOffset);
+            giftProgress = Math.max(0f, Math.min(1f, giftProgress * 1.3f)); // clamp between 0 and 1
             final GiftPosition position = giftsPositions.get(i);
             final Gift gift = gifts.get(i);
 
+            final float scale = lerp((i + 1) * 0.1f, 1.0f, giftProgress);
+            float x = AndroidUtilities.lerp(avatarCenterX, position.x, giftProgress);
+            float y = AndroidUtilities.lerp(avatarCenterY, position.y, giftProgress);
             gift.draw(
                     canvas,
-                    position.x,
-                    position.y,
+                    x,
+                    y,
                     scale,
                     position.rotation,
                     1.0f,
                     1.0f
             );
         }
-
-//        for (int i = 0; i < gifts.size(); ++i) {
-//            final Gift gift = gifts.get(i);
-//            final float alpha = gift.animatedFloat.set(1.0f);
-//            final float scale = lerp(0.5f, 1.0f, alpha);
-//            final int index = i; // gifts.size() == maxCount ? i - 1 : i;
-//            if (index == 0) {
-//                gift.draw(
-//                        canvas,
-//                        (float) (acx + ar * Math.cos(-65 / 180.0f * Math.PI)),
-//                        (float) (acy + ar * Math.sin(-65 / 180.0f * Math.PI)),
-//                        scale,
-//                        -65 + 90,
-//                        1.0f,
-//                        lerp(0.9f, 0.25f, actionBarProgress)
-//                );
-//            } else if (index == 1) {
-//                gift.draw(
-//                        canvas,
-//                        lerp(cacx + Math.min(getWidth() * .27f, dp(62)), cx, 0.5f * actionBarProgress), acy - dp(52),
-//                        scale,
-//                        -4.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 2) {
-//                gift.draw(
-//                        canvas,
-//                        lerp(cacx + Math.min(getWidth() * .46f, dp(105)), cx, 0.5f * actionBarProgress), acy - dp(72),
-//                        scale,
-//                        8.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 3) {
-//                gift.draw(
-//                        canvas,
-//                        lerp(cacx + Math.min(getWidth() * .60f, dp(136)), cx, 0.5f * actionBarProgress), acy - dp(46),
-//                        scale,
-//                        3.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 4) {
-//                gift.draw(
-//                        canvas,
-//                        lerp(cacx + Math.min(getWidth() * .08f, dp(21.6f)), cx, 0.5f * actionBarProgress), acy - dp(82f),
-//                        scale,
-//                        -3.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 5) {
-//                gift.draw(
-//                        canvas,
-//                        lerp(cacx + Math.min(getWidth() * .745f, dp(186)), cx, 0.5f * actionBarProgress), acy - dp(39),
-//                        scale,
-//                        2.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 6) {
-//                gift.draw(
-//                        canvas,
-//                        cacx + Math.min(getWidth() * .38f, dp(102)), expandY - dp(12),
-//                        scale,
-//                        0,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 7) {
-//                gift.draw(
-//                        canvas,
-//                        cacx + Math.min(getWidth() * .135f, dp(36)), expandY - dp(17.6f),
-//                        scale,
-//                        -5.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            } else if (index == 8) {
-//                gift.draw(
-//                        canvas,
-//                        cacx + Math.min(getWidth() * .76f, dp(178)),
-//                        expandY - dp(21.66f),
-//                        scale,
-//                        5.0f,
-//                        1.0f,
-//                        1.0f
-//                );
-//            }
-//        }
 
         canvas.restore();
     }

@@ -128,8 +128,11 @@ public class ProfileToolbarHelper {
             storyView.invalidate();
         }
         if (giftsView != null) {
-            giftsView.setExpandProgress(progress);
             giftsView.setExpandCoords(toolbarHeight);
+            // gift animation should start after image become visible and text start moving
+            float normalized = (progress - textFirstMoveThreshHold) / (1f - textFirstMoveThreshHold);
+            normalized = Math.max(0f, Math.min(1f, normalized));
+            giftsView.setExpandProgress(normalized);
         }
 
         if (toolbarButtonsLayout != null) {
