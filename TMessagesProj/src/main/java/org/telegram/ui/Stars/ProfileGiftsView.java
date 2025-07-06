@@ -389,22 +389,38 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
             else
                 right.add(pos);
         }
-        left.sort(Comparator.comparingDouble(pos -> Math.abs(pos.x - centerX)));
-        right.sort(Comparator.comparingDouble(pos -> Math.abs(pos.x - centerX)));
+
         // 3. Alternate assignment : one left, one right ...
         List<GiftPosition> result = new ArrayList<>();
+        List<GiftPosition> leftResults = new ArrayList<>();
+        List<GiftPosition> rightResults = new ArrayList<>();
         Random random = new java.util.Random();
         int l = 0, r = 0;
         for (int i = 0; i < MAX_GIFT_LIMIT; i++) {
             if (i % 2 == 0 && l < left.size()) {
                 int randomIndex = random.nextInt(left.size());
-                result.add(left.get(randomIndex));
+                leftResults.add(left.get(randomIndex));
                 left.remove(randomIndex);
                 l++;
             } else if (i % 2 == 1 && r < right.size()) {
                 int randomIndex = random.nextInt(right.size());
-                result.add(right.get(randomIndex));
+                rightResults.add(right.get(randomIndex));
                 right.remove(randomIndex);
+                r++;
+            }
+        }
+
+        // 4. Sort based on y, so the items at bottom move first during animation to not overlap with texts
+        leftResults.sort(Comparator.comparingDouble(pos -> pos.y));
+        rightResults.sort(Comparator.comparingDouble(pos -> pos.y));
+        l = 0;
+        r = 0;
+        for (int i = 0; i < MAX_GIFT_LIMIT; i++) {
+            if (i % 2 == 0 && l < left.size()) {
+                result.add(leftResults.get(l));
+                l++;
+            } else if (i % 2 == 1 && r < right.size()) {
+                result.add(rightResults.get(r));
                 r++;
             }
         }
