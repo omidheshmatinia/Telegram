@@ -283,6 +283,7 @@ public class ProfileToolbarHelper {
             storyView.invalidate();
         }
         if (giftsView != null) {
+            giftsView.setTranslationY(extraHeight - FIRST_EXPANSION_HEIGHT_THRESH_HOLD);
             giftsView.invalidate();
         }
 
@@ -417,13 +418,14 @@ public class ProfileToolbarHelper {
         expandAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                referenceCallback.getGiftsView().setAlpha(1f);
                 isThirdPhaseRunning = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 isThirdPhaseRunning = false;
-               expandAnimator.removeListener(this);
+                expandAnimator.removeListener(this);
             }
         });
         expandAnimator.start();
@@ -445,6 +447,7 @@ public class ProfileToolbarHelper {
         final ProfileActivity.AvatarImageView avatarImage = referenceCallback.getAvatarImage();
         final ProfileActivity.PagerIndicatorView avatarsViewPagerIndicatorView = referenceCallback.getIndicatorView();
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
+        final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
         if (otherItem != null) {
             if (!isChatNoForward) {
                 otherItem.showSubItem(gallery_menu_save);
@@ -484,6 +487,7 @@ public class ProfileToolbarHelper {
                 setAvatarForegroundImage(false);
                 avatarsViewPager.setAnimatedFileMaybe(avatarImage.getImageReceiver().getAnimation());
                 avatarsViewPager.resetCurrentItem();
+                giftsView.setAlpha(0f);
             }
 
             @Override
