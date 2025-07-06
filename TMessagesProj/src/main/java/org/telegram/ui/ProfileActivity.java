@@ -781,6 +781,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         public int requestApplyPeerColor(int color, boolean actionBar, Boolean online) {
             return applyPeerColor(color, actionBar, online);
         }
+
+        @Override
+        public TopView getTopView() {
+            return topView;
+        }
     });
 
     private final Property<ProfileActivity, Float> HEADER_SHADOW = new AnimationProperties.FloatProperty<ProfileActivity>("headerShadow") {
@@ -1086,7 +1091,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
-    private class TopView extends FrameLayout {
+    public class TopView extends FrameLayout {
 
         private int currentColor;
         private Paint paint = new Paint();
@@ -1172,6 +1177,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         private boolean hasEmoji;
         private boolean emojiIsCollectible;
+        private List<IconPosition> iconPositions = new ArrayList<>();
         public void setBackgroundEmojiId(long emojiId, boolean isCollectible, boolean animated) {
             emoji.set(emojiId, animated);
             emoji.setColor(emojiColor);
@@ -1180,6 +1186,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 emojiFullT.force(isCollectible);
             }
             hasEmoji = hasEmoji || emojiId != 0 && emojiId != -1;
+
+            float height = ((actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + dp(144)) - (1f - extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) * dp(50);
+            float alpha = Math.min(1f, extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD);
+            iconPositions = createProfilePatternForProfileScreen();
             invalidate();
         }
 
@@ -1235,11 +1245,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 if (hasEmoji) {
                     final float loadedScale = emojiLoadedT.set(isEmojiLoaded());
-                    final float full = emojiFullT.set(emojiIsCollectible);
                     if (loadedScale > 0) {
                         canvas.save();
-                        canvas.clipRect(0, 0, getMeasuredWidth(), y1);
-                        StarGiftPatterns.drawProfilePattern(canvas, emoji, getMeasuredWidth(), ((actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + dp(144)) - (1f - extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) * dp(50), Math.min(1f, extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD), full);
+                        canvas.clipRect(0, 0, getMeasuredWidth(), extraHeight);
+                        drawIcons(canvas, iconPositions);
                         canvas.restore();
                     }
                 }
@@ -1266,7 +1275,93 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 parentLayout.drawHeaderShadow(canvas, (int) (headerShadowAlpha * 255), (int) v);
             }
         }
+
+        private float expandProgress = 0f;
+
+        public void setExpandProgress(float progress){
+            this.expandProgress = progress;
+        }
+
+        private void drawIcons(Canvas canvas, List<IconPosition> iconPositions) {
+            if(this.getAlpha() == 0) return;
+
+            canvas.save();
+            canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            float avatarCenterX = avatarContainer.getX()+ avatarContainer.getWidth() / 2;
+            float avatarCenterY = avatarContainer.getY() + avatarContainer.getHeight() / 2;
+
+            final float stagger = 0.03f; // delay between each gift item to start moving
+            final float maxOffset = (iconPositions.size() - 1) * stagger;
+
+            for (int i = 0; i < iconPositions.size(); i++) {
+
+                float progress = (expandProgress - i * stagger) / (1.0f - maxOffset);
+                progress = Math.max(0f, Math.min(1f, progress * 1.3f)); // clamp between 0 and 1
+                IconPosition position = iconPositions.get(i);
+
+                float x = position.x+ (int) avatarCenterX;
+                float y = position.y+ (int) avatarCenterY;
+                final float scale = lerp((i + 1) * 0.1f, 1.0f, progress);
+                x = AndroidUtilities.lerp(avatarCenterX, x, progress);
+                y = AndroidUtilities.lerp(avatarCenterY, y, progress);
+                float alpha = AndroidUtilities.lerp(0, position.alpha, progress);
+                final float size = position.size * scale;
+                emoji.setBounds(
+                        (int) (x - size / 2),
+                        (int) (y - size / 2),
+                        (int) (x + size / 2),
+                        (int) (y + size / 2)
+                );
+                emoji.setAlpha((int) (0xFF * alpha * this.getAlpha()));
+                emoji.draw(canvas);
+            }
+            canvas.restore();
+        }
+
         private Rect blurBounds = new Rect();
+
+        private final float[] profilePositionsAccordingToCenter = new float[] {
+                (float) 0, MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(18) , dp(24), 0.3f,
+                (float) 0, -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(18) , dp(24), 0.3f,
+                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(40), 0 , dp(24), 0.3f,
+                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(92), 0 , dp(20), 0.18f,
+                (float)  MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(92), 0 , dp(20), 0.18f,
+                (float)  MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(40), 0 , dp(24), 0.3f,
+                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12), (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12) , dp(24), 0.3f,
+                (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12), (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12) , dp(24), 0.3f,
+                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , dp(24), 0.3f,
+                (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12), (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , dp(24), 0.3f,
+        };
+
+        private class IconPosition {
+            public float alpha;
+            public int x, y, size;
+
+            public IconPosition(int x, int y, float alpha, int size) {
+                this.x = x;
+                this.y = y;
+                this.alpha = alpha;
+                this.size = size;
+            }
+        }
+
+        private List<IconPosition> createProfilePatternForProfileScreen() {
+            List<IconPosition> positions = new ArrayList<IconPosition>();
+
+            for (int i = 0; i < profilePositionsAccordingToCenter.length; i += 4) {
+                final float x = profilePositionsAccordingToCenter[i];
+                final float y = profilePositionsAccordingToCenter[i + 1];
+                final float size = profilePositionsAccordingToCenter[i + 2];
+                final float thisAlpha = profilePositionsAccordingToCenter[i + 3];
+                positions.add(new IconPosition(
+                        (int) x,
+                        (int) y,
+                        thisAlpha,
+                        (int) size
+                ));
+            }
+            return positions;
+        }
     }
 
     private class NestedFrameLayout extends SizeNotifierFrameLayout implements NestedScrollingParent3 {

@@ -119,19 +119,24 @@ public class ProfileToolbarHelper {
         final ProfileActivity.ShowDrawable showStatusButton = referenceCallback.getShowStatusButton();
         final AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView = referenceCallback.getMediaCounterTextView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
-
+        final ProfileActivity.TopView topView = referenceCallback.getTopView();
         final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
         params.width = params.height = MIN_PROFILE_IMAGE_CIRCLE_SIZE;
         avatarImageView.setRoundRadius(referenceCallback.requestGetSmallAvatarRoundRadius());
 
+        // gift animation and toolbar emojis animation should start after image become visible and text start moving
+        float normalized = (progress - textFirstMoveThreshHold) / (1f - textFirstMoveThreshHold);
+        normalized = Math.max(0f, Math.min(1f, normalized));
+
+        if (topView != null) {
+            topView.setExpandProgress(normalized);
+            topView.invalidate();
+        }
         if (storyView != null) {
             storyView.invalidate();
         }
         if (giftsView != null) {
             giftsView.setExpandCoords(toolbarHeight);
-            // gift animation should start after image become visible and text start moving
-            float normalized = (progress - textFirstMoveThreshHold) / (1f - textFirstMoveThreshHold);
-            normalized = Math.max(0f, Math.min(1f, normalized));
             giftsView.setExpandProgress(normalized);
         }
 
@@ -805,5 +810,6 @@ public class ProfileToolbarHelper {
         void requestCheckPhotoDescriptionAlpha();
         int requestGetSmallAvatarRoundRadius();
         int requestApplyPeerColor(int color, boolean actionBar, Boolean online);
+        ProfileActivity.TopView getTopView();
     }
 }
