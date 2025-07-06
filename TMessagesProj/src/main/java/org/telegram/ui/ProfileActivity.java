@@ -4951,6 +4951,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
               profileToolbarHelper.setupGifts();
             }
         });
+        avatarContainer2.bringChildToFront(avatarContainer); // gifts should be below avatarContainer
+        avatarContainer2.bringChildToFront(avatarsViewPager); // gifts should be below avatarsViewPager
         profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
         updateProfileData(true);
         needLayout(false);
