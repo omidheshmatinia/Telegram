@@ -4736,7 +4736,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
             }
         };
-        avatarContainer = new ProfileAvatarContainer(context, avatarImage);
+        avatarContainer = new ProfileAvatarContainer(context, avatarImage, resourcesProvider);
         avatarContainer2.addView(avatarContainer, LayoutHelper.createFrame(MIN_PROFILE_IMAGE_CIRCLE_SIZE, MIN_PROFILE_IMAGE_CIRCLE_SIZE, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
         avatarImage.getImageReceiver().setAllowDecodeSingleFrame(true);
         avatarImage.setRoundRadius(getSmallAvatarRoundRadius());
