@@ -289,6 +289,7 @@ import org.telegram.ui.bots.BotLocation;
 import org.telegram.ui.bots.BotWebViewAttachedSheet;
 import org.telegram.ui.bots.ChannelAffiliateProgramsFragment;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
+import org.telegram.ui.screens.profile.ProfileAvatarContainer;
 import org.telegram.ui.screens.profile.ProfileOverlaysView;
 import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
@@ -357,7 +358,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private RLottieDrawable cellCameraDrawable;
 
     private HintView fwdRestrictedHint;
-    private FrameLayout avatarContainer;
+    private ProfileAvatarContainer avatarContainer;
     private NestedSizeNotifierLayout avatarContainer2;
     private DrawerProfileCell.AnimatedStatusView animatedStatusView;
     private AvatarImageView avatarImage;
@@ -4618,7 +4619,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         animatedStatusView.setPivotX(AndroidUtilities.dp(30));
         animatedStatusView.setPivotY(AndroidUtilities.dp(30));
 
-        avatarContainer = new FrameLayout(context);
         avatarContainer2 = new NestedSizeNotifierLayout(context) {
 
             CanvasButton canvasButton;
@@ -4713,7 +4713,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         fallbackImage.setRoundRadius(AndroidUtilities.dp(11));
         AndroidUtilities.updateViewVisibilityAnimated(avatarContainer2, true, 1f, false);
         frameLayout.addView(avatarContainer2, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.START, 0, 0, 0, 0));
-        avatarContainer2.addView(avatarContainer, LayoutHelper.createFrame(MIN_PROFILE_IMAGE_CIRCLE_SIZE, MIN_PROFILE_IMAGE_CIRCLE_SIZE, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
         avatarImage = new AvatarImageView(context) {
             @Override
             public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
@@ -4737,11 +4736,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
             }
         };
+        avatarContainer = new ProfileAvatarContainer(context, avatarImage);
+        avatarContainer2.addView(avatarContainer, LayoutHelper.createFrame(MIN_PROFILE_IMAGE_CIRCLE_SIZE, MIN_PROFILE_IMAGE_CIRCLE_SIZE, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
         avatarImage.getImageReceiver().setAllowDecodeSingleFrame(true);
         avatarImage.setRoundRadius(getSmallAvatarRoundRadius());
         avatarImage.setPivotX(0);
         avatarImage.setPivotY(0);
-        avatarContainer.addView(avatarImage, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         avatarImage.setOnClickListener(v -> {
             if (avatarBig != null) {
                 return;
