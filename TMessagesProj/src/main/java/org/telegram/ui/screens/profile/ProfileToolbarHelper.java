@@ -118,7 +118,7 @@ public class ProfileToolbarHelper {
         final ProfileActivity.AvatarImageView avatarImageView = referenceCallback.getAvatarImage();
         final ProfileActivity.ShowDrawable showStatusButton = referenceCallback.getShowStatusButton();
         final AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView = referenceCallback.getMediaCounterTextView();
-        final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
+        final ProfileAvatarContainer avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileActivity.TopView topView = referenceCallback.getTopView();
         final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
         params.width = params.height = MIN_PROFILE_IMAGE_CIRCLE_SIZE;
@@ -138,6 +138,9 @@ public class ProfileToolbarHelper {
         if (giftsView != null) {
             giftsView.setExpandCoords(toolbarHeight);
             giftsView.setExpandProgress(normalized);
+        }
+        if (avatarContainer != null) {
+            avatarContainer.updateProgress(progress);
         }
 
         if (toolbarButtonsLayout != null) {
@@ -779,7 +782,7 @@ public class ProfileToolbarHelper {
     public interface ProfileActivityReferenceCallback {
         ProfileActivity.AvatarImageView getAvatarImage();
 
-        FrameLayout getAvatarContainer();
+        ProfileAvatarContainer getAvatarContainer();
 
         NestedSizeNotifierLayout getAvatarContainer2();
 

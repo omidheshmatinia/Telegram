@@ -19,6 +19,8 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.FileLog;
@@ -59,24 +61,28 @@ public class ProfileAvatarContainer extends FrameLayout {
     public ArrayList<View> blurBehindViews = new ArrayList<>();
 
     private ProfileActivity.AvatarImageView avatarImage;
-    private final View blackForegroundView;
+
+    private String TAG = "ProfileAvatarContainer";
+
+    private final CircularForegroundView blackForegroundView;
+
     public ProfileAvatarContainer(@NonNull Context context, ProfileActivity.AvatarImageView avatarImageView) {
         super(context);
         this.avatarImage = avatarImageView;
-        this.blackForegroundView = new View(context);
+        this.blackForegroundView = new CircularForegroundView(context, Color.BLACK);
         blackForegroundView.setAlpha(0f);
-        blackForegroundView.setBackgroundColor(Color.BLACK); //todo set bg color
         addView(avatarImage, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         addView(blackForegroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
     }
 
-    public void updateProgress(float progress){
-        // todo alpha black foreground
-        if (progress <= 0.8f) {
-            float alphaProgress= Math.max(0f, (progress - 0.2f) / 0.8f);
-            blackForegroundView.setAlpha(alphaProgress);
+    public void updateProgress(float progress) {
+        final float START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD = 0.45f;
+        final float START_SHOWING_BLACK_WHEN_COLLAPSING_THRESHOLD = 0.3f;
 
-        }
+        float alphaProgress = Math.max(0f, (progress - START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD)) / (1 - START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD); //start removing black foreground when progress > 0.4
+        alphaProgress = Math.min(1f, alphaProgress * (1 + START_SHOWING_BLACK_WHEN_COLLAPSING_THRESHOLD));  //start showing black foreground when progress < 0.91
+        Log.e(TAG, " updateProgress =" + progress + "  alphaProgress=" + alphaProgress);
+        blackForegroundView.setAlpha(1 - alphaProgress);
 
         // todo blur background
     }
@@ -167,8 +173,8 @@ public class ProfileAvatarContainer extends FrameLayout {
 //            canvas.drawCircle(cx, cy, radius, selectedBlurPaint);
 //            canvas.restore();
 //        } else {
-            canvas.drawCircle(cx, cy, radius, blurScrimPaint);
-            canvas.drawCircle(cx, cy, radius, selectedBlurPaint);
+        canvas.drawCircle(cx, cy, radius, blurScrimPaint);
+        canvas.drawCircle(cx, cy, radius, selectedBlurPaint);
 //        }
 
         blurScrimPaint.setAlpha(blurAlpha);
@@ -185,15 +191,15 @@ public class ProfileAvatarContainer extends FrameLayout {
             matrix.reset();
             matrix2.reset();
 //            if (!top) {
-                float y1 = -viewY + currentBitmap.bottomOffset - currentBitmap.pixelFixOffset - TOP_CLIP_OFFSET - (currentBitmap.drawnListTranslationY - getMeasuredHeight());
-                matrix.setTranslate(0, y1);
-                matrix.preScale(currentBitmap.bottomScaleX, currentBitmap.bottomScaleY);
+            float y1 = -viewY + currentBitmap.bottomOffset - currentBitmap.pixelFixOffset - TOP_CLIP_OFFSET - (currentBitmap.drawnListTranslationY - getMeasuredHeight());
+            matrix.setTranslate(0, y1);
+            matrix.preScale(currentBitmap.bottomScaleX, currentBitmap.bottomScaleY);
 
-                if (prevBitmap != null) {
-                    y1 = -viewY + prevBitmap.bottomOffset - prevBitmap.pixelFixOffset - TOP_CLIP_OFFSET - (prevBitmap.drawnListTranslationY - getMeasuredHeight());
-                    matrix2.setTranslate(0, y1);
-                    matrix2.preScale(prevBitmap.bottomScaleX, prevBitmap.bottomScaleY);
-                }
+            if (prevBitmap != null) {
+                y1 = -viewY + prevBitmap.bottomOffset - prevBitmap.pixelFixOffset - TOP_CLIP_OFFSET - (prevBitmap.drawnListTranslationY - getMeasuredHeight());
+                matrix2.setTranslate(0, y1);
+                matrix2.preScale(prevBitmap.bottomScaleX, prevBitmap.bottomScaleY);
+            }
 //            } else {
 //                matrix.setTranslate(0, -viewY - currentBitmap.pixelFixOffset - TOP_CLIP_OFFSET);
 //                matrix.preScale(currentBitmap.topScaleX, currentBitmap.topScaleY);
@@ -305,7 +311,7 @@ public class ProfileAvatarContainer extends FrameLayout {
 //            drawList(finalBitmap.bottomCanvas, false, null);
 //            finalBitmap.bottomCanvas.restore();
 //        } else {
-            finalBitmap.needBlurBottom = false;
+        finalBitmap.needBlurBottom = false;
 //        }
 
 
@@ -349,7 +355,8 @@ public class ProfileAvatarContainer extends FrameLayout {
 //    }
 
 //    void drawList(Canvas blurCanvas) { //todo IMPORTANT
-////        if(avatarContainer == null) return;
+
+    /// /        if(avatarContainer == null) return;
 //        blurCanvas.save();
 //        draw(blurCanvas);
 //        blurCanvas.restore();
@@ -392,8 +399,6 @@ public class ProfileAvatarContainer extends FrameLayout {
 //            }
 //        }
 //    }
-
-
     public void invalidateBlurredViews() {
         blurNodeInvalidated[0] = true;
         blurNodeInvalidated[1] = true;
@@ -496,6 +501,27 @@ public class ProfileAvatarContainer extends FrameLayout {
             if (bottomBitmap != null) {
                 bottomBitmap.recycle();
             }
+        }
+    }
+
+    private static class CircularForegroundView extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        public CircularForegroundView(Context context, int color) {
+            super(context);
+            paint.setColor(color);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float radius = Math.min(getWidth(), getHeight()) / 2f;
+            canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, paint);
+        }
+
+        public void setColor(int color) {
+            paint.setColor(color);
+            invalidate();
         }
     }
 }

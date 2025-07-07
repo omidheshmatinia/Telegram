@@ -694,7 +694,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         @Override
-        public FrameLayout getAvatarContainer() {
+        public ProfileAvatarContainer getAvatarContainer() {
             return avatarContainer;
         }
 
