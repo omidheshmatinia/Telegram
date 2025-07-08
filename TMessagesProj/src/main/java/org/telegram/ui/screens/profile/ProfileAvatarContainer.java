@@ -178,6 +178,7 @@ public class ProfileAvatarContainer extends FrameLayout {
             return dx;
         }
 
+        final float MIN_DROP_WIDTH = dp(16);
         public void update() {
             float centerScreenX = avatarView.getX() + (float) avatarView.getWidth() / 2;
             float scale = avatarView.getScaleY();
@@ -189,38 +190,101 @@ public class ProfileAvatarContainer extends FrameLayout {
             final float avatarBottom = avatarTop + newSize;
             float avatarCenter = avatarTop + newSize / 2;
             float circleSideDistanceToCenter = getCirclePointComparedToCenterWhenItCutScreen(avatarRadius, avatarBottom);
-            if (avatarBottom <= 0) return; // no need to draw anything
-
-            //bottom 0 > dp(10)
-            //bottom = size/2 > MAX
+            if (avatarBottom <= 0) {
+                path.reset();
+                return; // no need to draw anything
+            }
 
             // STEP ONE FROM OUT OF THE WINDOW TILL HALF INSIDE
             path.reset();
-            if (avatarCenter < 0) {
-//            final float difference = Math.min(Math.abs(THRESH_HOLD_FOR_MAX_HEIGHT - avatarBottom), THRESH_HOLD_FOR_MAX_HEIGHT);
-//                final float difference = avatarBottom > 0 AND avatarBottom = newSize /2
-                final float progress = -avatarCenter / (avatarStartSize / 2);
-                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(32), dp(32), progress); // this one should change based on distance
-                Log.e("OMID", "centerX=" + centerScreenX + "  circleSideDistanceToCenter=" + circleSideDistanceToCenter + "   screenSidePointsGap=" + screenSidePointsGap + "   avatarCenter=" + avatarCenter + "   avatarTop=" + avatarTop + "   progress=" + progress + "   screenSidePointsGap=" + screenSidePointsGap + "   newSize=" + newSize + "  avatarBottom=" + avatarBottom + "  ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE=" + ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
-                path.reset();
+            if (avatarCenter < THRESH_HOLD_FOR_MAX_HEIGHT) {
+                paint.setColor(Color.CYAN);
+//                final float progress = -avatarCenter / (avatarStartSize / 2);
+//                float screenSidePointsGap = AndroidUtilities.lerp(circleSideDistanceToCenter + dp(8), MIN_DROP_WIDTH, progress);
+                float screenSidePointsGap = circleSideDistanceToCenter + dp(16);
                 final float startPointX = centerScreenX - screenSidePointsGap;
                 final float endPointX = centerScreenX + screenSidePointsGap;
                 path.moveTo(startPointX, 0);
 
-                path.cubicTo(startPointX, avatarBottom,
-                        centerScreenX, avatarBottom, //todo here there should be a degree which change the second point, from \ to |
+                path.quadTo(startPointX + screenSidePointsGap / 4,0, centerScreenX - circleSideDistanceToCenter, avatarBottom/2);
+                path.quadTo((centerScreenX - circleSideDistanceToCenter) + screenSidePointsGap / 6 , avatarBottom, centerScreenX, avatarBottom);
+//                path.lineTo(centerScreenX, 0);
+
+//                path.quadTo(centerScreenX + circleSideDistanceToCenter*3 /4,avatarBottom, centerScreenX + circleSideDistanceToCenter, avatarBottom/2);
+//                path.quadTo((centerScreenX + circleSideDistanceToCenter) + screenSidePointsGap / 6 , 0, endPointX, 0);
+                path.lineTo(centerScreenX,0);
+                path.lineTo(startPointX,0);
+
+                path.moveTo(endPointX , 0);
+                path.quadTo(endPointX - screenSidePointsGap / 4,0, centerScreenX + circleSideDistanceToCenter, avatarBottom/2);
+                path.quadTo((centerScreenX + circleSideDistanceToCenter) - screenSidePointsGap / 6 , avatarBottom, centerScreenX, avatarBottom);
+                path.lineTo(centerScreenX,0);
+                path.lineTo(endPointX , 0);
+
+                // Draw right side (mirrored)
+//                float mirror = centerScreenX;
+//                float mirroredControl1X = 2 * mirror - (startPointX + screenSidePointsGap / 4);
+//                float mirroredEnd1X = 2 * mirror - (centerScreenX - circleSideDistanceToCenter);
+//
+//                float mirroredControl2X = 2 * mirror - ((centerScreenX - circleSideDistanceToCenter) + screenSidePointsGap / 6);
+//                float mirroredEnd2X = 2 * mirror - centerScreenX; // which is centerScreenX
+//
+//                path.quadTo(mirroredControl1X, 0, mirroredEnd1X, avatarBottom / 2);
+//                path.quadTo(mirroredControl2X, avatarBottom, endPointX, 0);
+
+
+
+
+//                path.cubicTo(startPointX + screenSidePointsGap / 4, 0,
+//                        startPointX + screenSidePointsGap / 4, avatarBottom / 4,
+//                        startPointX + screenSidePointsGap / 2, avatarBottom/2);
+//
+//                path.cubicTo(startPointX + (screenSidePointsGap * 3 / 4), avatarBottom,
+//                        centerScreenX - (screenSidePointsGap / 4), avatarBottom,
+//                        centerScreenX, avatarBottom);
+//
+//                path.cubicTo(centerScreenX + screenSidePointsGap / 2, (avatarBottom * 3 / 4),
+//                        endPointX - screenSidePointsGap / 2, (avatarBottom * 1 / 4),
+//                        endPointX, 0);
+//                path.quadTo();
+//
+//                final float progress = -avatarCenter / (avatarStartSize / 2);
+//                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(32), MIN_DROP_WIDTH, progress); // this one should change based on distance
+//                Log.e("OMID", "centerX=" + centerScreenX + "  circleSideDistanceToCenter=" + circleSideDistanceToCenter + "   screenSidePointsGap=" + screenSidePointsGap + "   avatarCenter=" + avatarCenter + "   avatarTop=" + avatarTop + "   progress=" + progress + "   screenSidePointsGap=" + screenSidePointsGap + "   newSize=" + newSize + "  avatarBottom=" + avatarBottom + "  ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE=" + ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
+//                path.reset();
+//                final float startPointX = centerScreenX - screenSidePointsGap;
+//                final float endPointX = centerScreenX + screenSidePointsGap;
+//                path.moveTo(startPointX, 0);
+//
+//                path.cubicTo(startPointX, avatarBottom,
+//                        centerScreenX, avatarBottom, //todo here there should be a degree which change the second point, from \ to |
+//                        centerScreenX, avatarBottom);
+//
+//                path.cubicTo(endPointX, avatarBottom,
+//                        endPointX, 0,
+//                        endPointX, 0);
+//                path.lineTo(centerScreenX, 0);
+//                path.lineTo(startPointX, 0);
+            } else if(THRESH_HOLD_FOR_MAX_HEIGHT < avatarCenter && avatarTop < THRESH_HOLD_FOR_MAX_HEIGHT) {
+                paint.setColor(Color.RED);
+                final float progress = -avatarCenter / (avatarStartSize / 2);
+                float screenSidePointsGap = AndroidUtilities.lerp((newSize / 2) + dp(8), MIN_DROP_WIDTH, progress);
+                final float startPointX = centerScreenX - screenSidePointsGap;
+                final float endPointX = centerScreenX + screenSidePointsGap;
+                path.moveTo(startPointX, 0);
+
+                path.cubicTo(startPointX + screenSidePointsGap / 2, (avatarBottom * 1 / 4),
+                        centerScreenX - screenSidePointsGap / 2, (avatarBottom * 3 / 4),
                         centerScreenX, avatarBottom);
 
-                path.cubicTo(endPointX, avatarBottom,
-                        endPointX, 0,
+                path.cubicTo(centerScreenX + screenSidePointsGap / 2, (avatarBottom * 3 / 4),
+                        endPointX - screenSidePointsGap / 2, (avatarBottom * 1 / 4),
                         endPointX, 0);
-                path.lineTo(centerScreenX, 0);
-                path.lineTo(startPointX, 0);
+
             } else if (avatarTop < THRESH_HOLD_FOR_MAX_HEIGHT) {
                 final float progress = Math.min(1f, avatarTop / THRESH_HOLD_FOR_MAX_HEIGHT);
-                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(16), dp(32), progress); // this one should change based on distance
+                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(8), MIN_DROP_WIDTH, progress); // this one should change based on distance
                 Log.e("OMID", "centerX=" + centerScreenX + "  circleSideDistanceToCenter=" + circleSideDistanceToCenter + "   screenSidePointsGap=" + screenSidePointsGap + "   avatarCenter=" + avatarCenter + "   avatarTop=" + avatarTop + "   progress=" + progress + "   screenSidePointsGap=" + screenSidePointsGap + "   newSize=" + newSize + "  avatarBottom=" + avatarBottom + "  ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE=" + ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
-                path.reset();
                 final float startPointX = centerScreenX - screenSidePointsGap;
                 final float endPointX = centerScreenX + screenSidePointsGap;
                 path.moveTo(startPointX, 0);
@@ -233,10 +297,9 @@ public class ProfileAvatarContainer extends FrameLayout {
                         endPointX, 0,
                         endPointX, 0);
             } else if (avatarTop > THRESH_HOLD_FOR_MAX_HEIGHT && avatarTop <= THRESH_HOLD_FOR_MAX_HEIGHT * 2) {
-
+                paint.setColor(Color.BLACK);
                 final float progress = Math.min(1f, (avatarTop - THRESH_HOLD_FOR_MAX_HEIGHT) / THRESH_HOLD_FOR_MAX_HEIGHT);
-                float screenSidePointsGap = AndroidUtilities.lerp(dp(32), dp(16), progress);
-                path.reset();
+                float screenSidePointsGap = AndroidUtilities.lerp(dp(32), MIN_DROP_WIDTH, progress);
                 final float startPointX = centerScreenX - screenSidePointsGap;
                 final float endPointX = centerScreenX + screenSidePointsGap;
                 final float centerY = Math.max(0, THRESH_HOLD_FOR_MAX_HEIGHT - (avatarTop - THRESH_HOLD_FOR_MAX_HEIGHT));
