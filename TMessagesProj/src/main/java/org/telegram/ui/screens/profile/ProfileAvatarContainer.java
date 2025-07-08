@@ -1,14 +1,19 @@
 package org.telegram.ui.screens.profile;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+
+import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DispatchQueue;
@@ -21,13 +26,14 @@ public class ProfileAvatarContainer extends FrameLayout {
 
     private final CircularForegroundView blackForegroundView;
     private final AvatarCircularBlurForeground blurredView;
+    private final CurvedAnimationLayout curvedAnimationLayout;
 
     public ProfileAvatarContainer(@NonNull Context context, ProfileActivity.AvatarImageView avatarImage, Theme.ResourcesProvider resourceProvider) {
         super(context);
         this.blackForegroundView = new CircularForegroundView(context, Color.BLACK);
         blackForegroundView.setAlpha(0f);
         addView(avatarImage, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-
+        this.curvedAnimationLayout = new CurvedAnimationLayout(getContext(), this);
         blurredView = new AvatarCircularBlurForeground(context, avatarImage, resourceProvider);
 
         addView(blurredView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -51,15 +57,22 @@ public class ProfileAvatarContainer extends FrameLayout {
         blurredView.setAlpha(blurredAlpha);
 
         invalidate();
+        curvedAnimationLayout.update();
     }
 
 
     private boolean isWindowVisible;
+    private boolean isCurvedAnimationAttached = false;
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         repeatDrawing();
+        ViewParent parent = getParent();
+        if (parent instanceof FrameLayout && !isCurvedAnimationAttached) {
+            isCurvedAnimationAttached = true;
+            ((FrameLayout) parent).addView(curvedAnimationLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        }
     }
 
     @Override
@@ -78,7 +91,7 @@ public class ProfileAvatarContainer extends FrameLayout {
     private void repeatDrawing() {
         if (!isWindowVisible) return;
         blurredView.invalidate();
-        blurQueue.postRunnable(this::repeatDrawing, 16);
+        blurQueue.postRunnable(this::repeatDrawing, 50);
     }
 
     private static class CircularForegroundView extends View {
@@ -131,6 +144,117 @@ public class ProfileAvatarContainer extends FrameLayout {
             canvas.clipPath(circlePath);
             // Draw the blurred content as usual
             super.onDraw(canvas);
+        }
+    }
+
+    public static class CurvedAnimationLayout extends View {
+
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path path = new Path();
+        private final View avatarView; // Reference to the avatar image or container
+
+        public CurvedAnimationLayout(Context context, View avatarView) {
+            super(context);
+            this.avatarView = avatarView;
+            paint.setColor(Color.CYAN);
+            paint.setStyle(Paint.Style.FILL);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawPath(path, paint);
+        }
+
+        final float THRESH_HOLD_FOR_MAX_HEIGHT = dp(12);
+        float avatarStartSize = ProfileToolbarHelper.MIN_PROFILE_IMAGE_CIRCLE_SIZE;
+
+
+        private float getCirclePointComparedToCenterWhenItCutScreen(float radius, float bottomOffset) {
+//            float y = cy - radius + bottomOffset;
+            float dx = (float) Math.sqrt(2 * radius * bottomOffset - bottomOffset * bottomOffset);
+//            float xLeft = cx - dx;
+//            float xRight = cx + dx; // rightmost point at this y
+            return dx;
+        }
+
+        public void update() {
+            float centerScreenX = avatarView.getX() + (float) avatarView.getWidth() / 2;
+            float scale = avatarView.getScaleY();
+            float newSize = scale * avatarView.getHeight();
+            float sizeDifference = avatarStartSize - newSize;
+            float avatarY = avatarView.getY();
+            float avatarRadius = newSize / 2f;
+            final float avatarTop = avatarY + sizeDifference / 2;
+            final float avatarBottom = avatarTop + newSize;
+            float avatarCenter = avatarTop + newSize / 2;
+            float circleSideDistanceToCenter = getCirclePointComparedToCenterWhenItCutScreen(avatarRadius, avatarBottom);
+            if (avatarBottom <= 0) return; // no need to draw anything
+
+            //bottom 0 > dp(10)
+            //bottom = size/2 > MAX
+
+            // STEP ONE FROM OUT OF THE WINDOW TILL HALF INSIDE
+            path.reset();
+            if (avatarCenter < 0) {
+//            final float difference = Math.min(Math.abs(THRESH_HOLD_FOR_MAX_HEIGHT - avatarBottom), THRESH_HOLD_FOR_MAX_HEIGHT);
+//                final float difference = avatarBottom > 0 AND avatarBottom = newSize /2
+                final float progress = -avatarCenter / (avatarStartSize / 2);
+                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(32), dp(32), progress); // this one should change based on distance
+                Log.e("OMID", "centerX=" + centerScreenX + "  circleSideDistanceToCenter=" + circleSideDistanceToCenter + "   screenSidePointsGap=" + screenSidePointsGap + "   avatarCenter=" + avatarCenter + "   avatarTop=" + avatarTop + "   progress=" + progress + "   screenSidePointsGap=" + screenSidePointsGap + "   newSize=" + newSize + "  avatarBottom=" + avatarBottom + "  ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE=" + ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
+                path.reset();
+                final float startPointX = centerScreenX - screenSidePointsGap;
+                final float endPointX = centerScreenX + screenSidePointsGap;
+                path.moveTo(startPointX, 0);
+
+                path.cubicTo(startPointX, avatarBottom,
+                        centerScreenX, avatarBottom, //todo here there should be a degree which change the second point, from \ to |
+                        centerScreenX, avatarBottom);
+
+                path.cubicTo(endPointX, avatarBottom,
+                        endPointX, 0,
+                        endPointX, 0);
+                path.lineTo(centerScreenX, 0);
+                path.lineTo(startPointX, 0);
+            } else if (avatarTop < THRESH_HOLD_FOR_MAX_HEIGHT) {
+                final float progress = Math.min(1f, avatarTop / THRESH_HOLD_FOR_MAX_HEIGHT);
+                float screenSidePointsGap = AndroidUtilities.lerp(newSize / 2 + dp(16), dp(32), progress); // this one should change based on distance
+                Log.e("OMID", "centerX=" + centerScreenX + "  circleSideDistanceToCenter=" + circleSideDistanceToCenter + "   screenSidePointsGap=" + screenSidePointsGap + "   avatarCenter=" + avatarCenter + "   avatarTop=" + avatarTop + "   progress=" + progress + "   screenSidePointsGap=" + screenSidePointsGap + "   newSize=" + newSize + "  avatarBottom=" + avatarBottom + "  ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE=" + ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
+                path.reset();
+                final float startPointX = centerScreenX - screenSidePointsGap;
+                final float endPointX = centerScreenX + screenSidePointsGap;
+                path.moveTo(startPointX, 0);
+
+                path.cubicTo(startPointX, 0,
+                        centerScreenX, avatarBottom, //todo here there should be a degree which change the second point, from \ to |
+                        centerScreenX, avatarBottom);
+
+                path.cubicTo(endPointX, avatarBottom,
+                        endPointX, 0,
+                        endPointX, 0);
+            } else if (avatarTop > THRESH_HOLD_FOR_MAX_HEIGHT && avatarTop <= THRESH_HOLD_FOR_MAX_HEIGHT * 2) {
+
+                final float progress = Math.min(1f, (avatarTop - THRESH_HOLD_FOR_MAX_HEIGHT) / THRESH_HOLD_FOR_MAX_HEIGHT);
+                float screenSidePointsGap = AndroidUtilities.lerp(dp(32), dp(16), progress);
+                path.reset();
+                final float startPointX = centerScreenX - screenSidePointsGap;
+                final float endPointX = centerScreenX + screenSidePointsGap;
+                final float centerY = Math.max(0, THRESH_HOLD_FOR_MAX_HEIGHT - (avatarTop - THRESH_HOLD_FOR_MAX_HEIGHT));
+                path.moveTo(startPointX, 0);
+
+                path.cubicTo(startPointX + screenSidePointsGap / 2, (centerY * 1 / 4),
+                        centerScreenX - screenSidePointsGap / 2, (centerY * 3 / 4),
+                        centerScreenX, centerY);
+
+                path.cubicTo(centerScreenX + screenSidePointsGap / 2, (centerY * 3 / 4),
+                        endPointX - screenSidePointsGap / 2, (centerY * 1 / 4),
+                        endPointX, 0);
+            }
+
+
+            path.close();
+
+            invalidate();
         }
     }
 }
