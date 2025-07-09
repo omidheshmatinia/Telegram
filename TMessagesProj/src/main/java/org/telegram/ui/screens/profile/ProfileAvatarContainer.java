@@ -29,7 +29,9 @@ public class ProfileAvatarContainer extends FrameLayout {
         super(context);
         this.blackForegroundView = new CircularForegroundView(context, Color.BLACK);
         blackForegroundView.setAlpha(0f);
-        addView(avatarImage, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        FrameLayout.LayoutParams lp = LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT);
+        lp.setMargins(1, 1, 1, 1); // to prevent anti alias issue at corners
+        addView(avatarImage, lp);
         this.curvedAnimationLayout = new CurvedAnimationLayout(getContext(), this);
         blurredView = new AvatarCircularBlurForeground(context, avatarImage, resourceProvider);
 
@@ -124,7 +126,7 @@ public class ProfileAvatarContainer extends FrameLayout {
             super.onSizeChanged(w, h, oldw, oldh);
             drawable.checkSizes();
             // Create a circular path
-            int circleSize = Math.min(backgroundView.getWidth(), ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2);
+            int circleSize = Math.min(((FrameLayout) backgroundView.getParent()).getWidth(), ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2); // using the parent for width calculation to prevent alias issue and padding
             float radius = circleSize / 2f;
             circlePath.addCircle(circleSize / 2f, circleSize / 2f, radius, Path.Direction.CW);
         }
@@ -140,7 +142,7 @@ public class ProfileAvatarContainer extends FrameLayout {
         }
     }
 
-    public static class CurvedAnimationLayout extends View {
+    private static class CurvedAnimationLayout extends View {
 
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path = new Path();
