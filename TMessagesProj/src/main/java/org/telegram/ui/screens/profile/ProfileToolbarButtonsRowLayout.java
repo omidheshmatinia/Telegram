@@ -40,14 +40,6 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
         setOrientation(HORIZONTAL);
         setClipToPadding(false);
         setClipChildren(false);
-        backgroundPaint.setColor(0x20ffffff);
-        /**
-         todo here no need to have background,
-         we add to see the blur
-         should be add to avatar container to see the blur for image based on animation
-         */
-        int color = Theme.getColor(Theme.key_windowBackgroundWhite, resourceProvider);
-        setBackgroundColor(color);
     }
 
     public void setItems(List<ProfileToolbarButtonItem> items) {

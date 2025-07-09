@@ -11,6 +11,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -42,6 +43,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AudioPlayerAlert;
 import org.telegram.ui.Components.BackupImageView;
+import org.telegram.ui.Components.BlurBehindDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.ImageUpdater;
@@ -69,7 +71,7 @@ public class ProfileToolbarHelper {
     public static final float NAME_SCALE_FULL_EXPANSION = 1.67f;
 
     public static final float THRESH_HOLD_FOR_AUTO_EXPAND = 0.25f;
-    public static final float THRESH_HOLD_FOR_AUTO_COLLAPSE = 0.75f;
+    public static final float THRESH_HOLD_FOR_AUTO_COLLAPSE = 0.39f;
 
     private ToolbarLayoutUpdateCallback toolbarLayoutUpdateCallback;
     private ProfileToolbarButtonsRowLayout toolbarButtonsLayout;
@@ -141,6 +143,9 @@ public class ProfileToolbarHelper {
         }
         if (avatarContainer != null) {
             avatarContainer.updateProgress(progress);
+        }
+        if (viewPagerBlurredBottom != null) {
+            viewPagerBlurredBottom.setAlpha(0f);
         }
 
         if (toolbarButtonsLayout != null) {
@@ -222,7 +227,53 @@ public class ProfileToolbarHelper {
         onlineTextView = _onlineTextView;
     }
 
+    public class ViewPagerBlurredBottom extends View {
+
+        public final BlurBehindDrawable drawable;
+        public ViewPagerBlurredBottom(Context context, View behindView, View parentView, Theme.ResourcesProvider resourcesProvider) {
+            super(context);
+            drawable = new BlurBehindDrawable(behindView, parentView, 1, resourcesProvider);
+            drawable.setAnimateAlpha(true);
+            drawable.show(true);
+        }
+
+
+        @Override
+        public void setTranslationY(float translationY) {
+            super.setTranslationY(translationY);
+            drawable.onPanTranslationUpdate(- translationY);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            Log.e("Blurred","onDraw is Called");
+            drawable.draw(canvas);
+            drawable.invalidate();
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+            drawable.checkSizes();
+        }
+
+        public void update() {
+            drawable.invalidate();
+        }
+
+        public boolean fullyDrawing() {
+            return drawable.isFullyDrawing() && getVisibility() == View.VISIBLE;
+        }
+    }
+
+    private ViewPagerBlurredBottom viewPagerBlurredBottom;
     public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView) {
+
+        viewPagerBlurredBottom = new ViewPagerBlurredBottom(context, referenceCallback.getAvatarsViewPager(), masterView, resourcesProvider);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT);
+        masterView.addView(viewPagerBlurredBottom, lp);
+        masterView.blurBehindViews.add(viewPagerBlurredBottom);
+
         toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView, resourcesProvider);
         masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
@@ -232,7 +283,6 @@ public class ProfileToolbarHelper {
         items.add(new ProfileToolbarButtonItem(R.drawable.filled_video, "Video")); //todo Omid it can be enum
         toolbarButtonsLayout.setItems(items);
         toolbarButtonsLayout.setAlpha(0f);
-        masterView.blurBehindViews.add(toolbarButtonsLayout);
     }
 
     private float _nameStartingY = 0;
@@ -283,6 +333,7 @@ public class ProfileToolbarHelper {
             float[] expandAnimatorValues,
             float extraHeight
     ) {
+        Log.e("SCROLL","222nd");
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
         final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
         float startingAvatarScale = (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
@@ -299,12 +350,14 @@ public class ProfileToolbarHelper {
         final AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView = referenceCallback.getMediaCounterTextView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
         final RecyclerListView listView = referenceCallback.getListView();
-        if (allowPullingDown && (openingAvatar || expandProgress >= THRESH_HOLD_FOR_AUTO_EXPAND)) {
+        float threshHOld = isPulledDown ? THRESH_HOLD_FOR_AUTO_COLLAPSE : THRESH_HOLD_FOR_AUTO_EXPAND;
+        if (allowPullingDown && (openingAvatar || expandProgress >= threshHOld)) {
              if (!expandAnimator.isRunning()) {
                 if (!isPulledDown) {
                     isPulledDown = startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, isChatNoForward);
                 }
             }
+            Log.e("SCROLL","2222 >   1");
             ViewGroup.LayoutParams params = avatarsViewPager.getLayoutParams();
             params.width = listView.getMeasuredWidth();
             params.height = (int) (h + newTop);
@@ -320,12 +373,16 @@ public class ProfileToolbarHelper {
                 nameTextView[1].setTranslationY(nameY);
                 onlineTextView[1].setTranslationX(onlineX);
                 onlineTextView[1].setTranslationY(onlineY);
+                //todo set height
+//                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)avatarContainer.getLayoutParams();
+//                lp.height = (int)extraHeight;
                 if (mediaCounterTextView != null) {
                     mediaCounterTextView.setTranslationX(onlineX);
                     mediaCounterTextView.setTranslationY(onlineTextView[1].getTranslationY());
                 }
                 if (toolbarButtonsLayout != null) {
                     toolbarButtonsLayout.setTranslationY(extraHeight);
+                    viewPagerBlurredBottom.setTranslationY(extraHeight);
                 }
                 fireUpdateCollectibleHintCallback();
             }
@@ -333,11 +390,13 @@ public class ProfileToolbarHelper {
             if (isPulledDown) {
                 isPulledDown= startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
             }
+            Log.e("SCROLL","2222 >   2");
 
             avatarContainer.setScaleX(avatarScale);
             avatarContainer.setScaleY(avatarScale);
 
             if (expandAnimator == null || !expandAnimator.isRunning()) {
+                Log.e("SCROLL","2222 >   3");
                 float avatarSizeDifferenceComparedToFirstState = (avatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE) - startingAvatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE;
                 avatarY = getAvatarYAfterFirstExpansion() + avatarSizeDifferenceComparedToFirstState;
                 avatarContainer.setTranslationY(avatarY);
@@ -358,6 +417,7 @@ public class ProfileToolbarHelper {
 
             if (toolbarButtonsLayout != null) {
                 toolbarButtonsLayout.setTranslationY(extraHeight);
+                viewPagerBlurredBottom.setTranslationY(extraHeight);
             }
         }
         if (toolbarLayoutUpdateCallback != null) {
@@ -378,6 +438,7 @@ public class ProfileToolbarHelper {
             boolean isInLandscapeMode,
             boolean doNotSetForeground
     ) {
+        Log.e("EXPAND","startAutoCollapse");
         final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileGalleryView avatarsViewPager = referenceCallback.getAvatarsViewPager();
@@ -423,6 +484,7 @@ public class ProfileToolbarHelper {
         avatarImage.setForegroundAlpha(1f);
         avatarContainer.setVisibility(View.VISIBLE);
         avatarsViewPager.setVisibility(View.GONE);
+        viewPagerBlurredBottom.setAlpha(0f);
         expandAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -449,6 +511,7 @@ public class ProfileToolbarHelper {
             ImageUpdater imageUpdater,
             boolean isChatNoForward
             ) {
+        Log.e("EXPAND","startAutoExpand");
         final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileGalleryView avatarsViewPager = referenceCallback.getAvatarsViewPager();
@@ -505,6 +568,8 @@ public class ProfileToolbarHelper {
                 topView.setBackgroundColor(Color.BLACK);
                 avatarContainer.setVisibility(View.GONE);
                 avatarsViewPager.setVisibility(View.VISIBLE);
+                viewPagerBlurredBottom.setAlpha(1f);
+                viewPagerBlurredBottom.update();
             }
         });
         expandAnimator.start();
@@ -555,6 +620,7 @@ public class ProfileToolbarHelper {
             ScamDrawable scamDrawable,
             Drawable lockIconDrawable
     ) {
+        Log.e("SCROLL","3RD");
         isThirdPhaseRunning = true;
         if(extraHeight < FIRST_EXPANSION_HEIGHT_THRESH_HOLD && expandAnimator.isRunning()){
             expandAnimator.cancel();
@@ -563,6 +629,7 @@ public class ProfileToolbarHelper {
         final View avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
         final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
+        final ProfileAvatarContainer avatarsContainer = referenceCallback.getAvatarContainer();
         final ActionBar actionBar = referenceCallback.getActionBar();
         final RecyclerListView listView = referenceCallback.getListView();
         final ProfileActivity.AvatarImageView avatarImage = referenceCallback.getAvatarImage();
@@ -580,6 +647,11 @@ public class ProfileToolbarHelper {
         if (storyView != null) {
             storyView.setExpandProgress(value);
         }
+
+//        if(avatarsContainer != null){
+//            avatarsContainer.updateThirdStageAnimationProgress(expandProgress);
+//        }
+
         if (searchItem != null) {
             searchItem.setAlpha(1.0f - value);
             searchItem.setScaleY(1.0f - value);
@@ -670,6 +742,7 @@ public class ProfileToolbarHelper {
 
         if (toolbarButtonsLayout != null) {
             toolbarButtonsLayout.setTranslationY(extraHeight);
+            viewPagerBlurredBottom.setTranslationY(extraHeight);
         }
         if (toolbarLayoutUpdateCallback != null) {
             toolbarLayoutUpdateCallback.onTextPositionUpdate(nameX, nameY, onlineX, onlineY);
