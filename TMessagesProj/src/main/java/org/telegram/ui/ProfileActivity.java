@@ -5039,15 +5039,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         avatarContainer2.addView(storyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         giftsView = new ProfileGiftsView(context, currentAccount, getDialogId(), avatarContainer, avatarImage, resourcesProvider);
-        avatarContainer2.addView(giftsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        avatarContainer2.addView(giftsView, 0, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT)); // gifts view should be below avatar container
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
               profileToolbarHelper.setupGifts();
             }
         });
-        avatarContainer2.bringChildToFront(avatarContainer); // gifts should be below avatarContainer
-        avatarContainer2.bringChildToFront(avatarsViewPager); // gifts should be below avatarsViewPager
         profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
         updateProfileData(true);
         needLayout(false);
