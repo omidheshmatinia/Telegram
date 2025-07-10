@@ -1,5 +1,6 @@
 package org.telegram.ui.screens.profile;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.ui.ProfileActivity.add_photo;
 import static org.telegram.ui.ProfileActivity.delete_avatar;
 import static org.telegram.ui.ProfileActivity.edit_avatar;
@@ -62,16 +63,16 @@ import org.telegram.ui.Stories.ProfileStoriesView;
 import java.util.ArrayList;
 
 public class ProfileToolbarHelper {
-    public static final int MAX_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(84);
-    public static final int MIN_PROFILE_IMAGE_CIRCLE_SIZE = AndroidUtilities.dp(42);
-    public static final int FIRST_EXPANSION_HEIGHT_THRESH_HOLD = AndroidUtilities.dp(180f);
-    public static final int GAP_BETWEEN_NAME_AND_ONLINE_TEXT = AndroidUtilities.dp(26.7f);
+    public static final int MAX_PROFILE_IMAGE_CIRCLE_SIZE = dp(84);
+    public static final int MIN_PROFILE_IMAGE_CIRCLE_SIZE = dp(42);
+    public static final int FIRST_EXPANSION_HEIGHT_THRESH_HOLD = dp(180f);
+    public static final int GAP_BETWEEN_NAME_AND_ONLINE_TEXT = dp(26.7f);
     public static final float TOOLBAR_TEXT_INITIAL_START_MARGIN = 64;
     public static final float NAME_SCALE_FIRST_EXPANSION = 1.12f;
-    public static final float NAME_SCALE_FULL_EXPANSION = 1.67f;
+    public static final float NAME_SCALE_FULL_EXPANSION = 1.12f;
 
     public static final float THRESH_HOLD_FOR_AUTO_EXPAND = 0.25f;
-    public static final float THRESH_HOLD_FOR_AUTO_COLLAPSE = 0.39f;
+    public static final float THRESH_HOLD_FOR_AUTO_COLLAPSE = 0.30f;
 
     private ToolbarLayoutUpdateCallback toolbarLayoutUpdateCallback;
     private ProfileToolbarButtonsRowLayout toolbarButtonsLayout;
@@ -168,12 +169,12 @@ public class ProfileToolbarHelper {
             avatarContainer.setScaleY(avatarScale);
             avatarContainer.setTranslationY((float) Math.ceil(avatarY));
             float extra = imageSize - MIN_PROFILE_IMAGE_CIRCLE_SIZE;
-            timeItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(16) + extra);
-            timeItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(15) + extra);
-            starBgItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(28) + extra);
-            starBgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
-            starFgItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(28) + extra);
-            starFgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
+            timeItem.setTranslationX(avatarContainer.getX() + dp(16) + extra);
+            timeItem.setTranslationY(avatarContainer.getY() + dp(15) + extra);
+            starBgItem.setTranslationX(avatarContainer.getX() + dp(28) + extra);
+            starBgItem.setTranslationY(avatarContainer.getY() + dp(24) + extra);
+            starFgItem.setTranslationX(avatarContainer.getX() + dp(28) + extra);
+            starFgItem.setTranslationY(avatarContainer.getY() + dp(24) + extra);
         }
         float nameEndY = Math.max(getNameEndYForPhase1(), nameStartingY);
         nameY = AndroidUtilities.lerp(nameStartingY, nameEndY, diff);
@@ -182,25 +183,33 @@ public class ProfileToolbarHelper {
             showStatusButton.setAlpha((int) (0xFF * diff));
         }
         for (int a = 0; a < nameTextView.length; a++) {
-            if (nameTextView[a] == null) {
+            if (nameTextView[a] == null || onlineTextView[a] == null) {
                 continue;
             }
+            if(diff == 1f){
+                needLayoutText(diff, FIRST_EXPANSION_HEIGHT_THRESH_HOLD, 0);
+            }
+            nameTextView[a].setScaleX(nameScale);
+            nameTextView[a].setScaleY(nameScale);
+
             if (expandAnimator == null || !expandAnimator.isRunning()) {
                 // when user click on profile icon, it expand to full state directly and the widths are still zero
                 if (nameTextView[a].getTextWidth() == 0) {
-                    nameX = AndroidUtilities.dp(-48);
-                    nameTextView[a].setX(AndroidUtilities.dp(16 - TOOLBAR_TEXT_INITIAL_START_MARGIN));
+                    nameX = dp(-48);
+                    nameTextView[a].setX(dp(16 - TOOLBAR_TEXT_INITIAL_START_MARGIN));
                 } else {
-                    nameX = diff * getTextCenterX(nameTextView[a]);
+                    nameX = diff * getTextCenterX(nameTextView[a], true);
                 }
                 nameTextView[a].setTranslationX(nameX);
                 nameTextView[a].setTranslationY(nameY);
 
+
+                nameTextView[a].requestLayout();
                 if (onlineTextView[a].getTextWidth() == 0) {
-                    onlineX = AndroidUtilities.dp(16 - TOOLBAR_TEXT_INITIAL_START_MARGIN);
-                    onlineTextView[a].setX(AndroidUtilities.dp(0));
+                    onlineX = dp(16 - TOOLBAR_TEXT_INITIAL_START_MARGIN);
+                    onlineTextView[a].setX(dp(0));
                 } else {
-                    onlineX = diff * getTextCenterX(onlineTextView[a]);
+                    onlineX = diff * getTextCenterX(onlineTextView[a], false);
                 }
                 onlineTextView[a].setTranslationX(onlineX);
                 onlineTextView[a].setTranslationY(onlineY);
@@ -209,8 +218,6 @@ public class ProfileToolbarHelper {
                     mediaCounterTextView.setTranslationY(onlineY);
                 }
             }
-            nameTextView[a].setScaleX(nameScale);
-            nameTextView[a].setScaleY(nameScale);
         }
         if (toolbarLayoutUpdateCallback != null) {
             toolbarLayoutUpdateCallback.onTextPositionUpdate(nameX, nameY, onlineX, onlineY);
@@ -305,8 +312,17 @@ public class ProfileToolbarHelper {
         return getNameStartingY() + (float) MIN_PROFILE_IMAGE_CIRCLE_SIZE / 2;
     }
 
-    private float getTextCenterX(SimpleTextView textView) {
-        return ((float) (screenWidth - textView.getTextWidth()) / 2 - AndroidUtilities.dp(TOOLBAR_TEXT_INITIAL_START_MARGIN));
+    /**
+     * calculate the Center TranslationX for textviews.
+     * @param textView
+     * @param isNameTextView
+     * @return
+     */
+    private float getTextCenterX(SimpleTextView textView, boolean isNameTextView) {
+        float startWidth = getTextCorrectWidth(textView, 1f, isNameTextView);
+        float startCenter = startWidth/ 2 + dp(TOOLBAR_TEXT_INITIAL_START_MARGIN);
+        float centerScreen = AndroidUtilities.displaySize.x / 2;
+        return centerScreen-startCenter;
     }
 
     public boolean handleExpansionInSecondStage(
@@ -400,8 +416,8 @@ public class ProfileToolbarHelper {
                 avatarY = getAvatarYAfterFirstExpansion() + avatarSizeDifferenceComparedToFirstState;
                 avatarContainer.setTranslationY(avatarY);
                 nameY = getNameYForPhase2And3(extraHeight);
-                nameX = getTextCenterX(nameTextView[1]);
-                onlineX = getTextCenterX(onlineTextView[1]);
+                nameX = getTextCenterX(nameTextView[1], true);
+                onlineX = getTextCenterX(onlineTextView[1], false);
                 onlineY = nameY + GAP_BETWEEN_NAME_AND_ONLINE_TEXT;
                 nameTextView[1].setTranslationX(nameX);
                 nameTextView[1].setTranslationY(nameY);
@@ -702,7 +718,6 @@ public class ProfileToolbarHelper {
         }
         onlineTextView[1].setTextColor(ColorUtils.blendARGB(referenceCallback.requestApplyPeerColor(statusColor, true, online), 0xB3FFFFFF, value));
         if (extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) {
-            nameTextView[1].setPivotY(AndroidUtilities.lerp(0, nameTextView[1].getMeasuredHeight(), value));
             nameTextView[1].setScaleX(AndroidUtilities.lerp(NAME_SCALE_FIRST_EXPANSION, NAME_SCALE_FULL_EXPANSION, value));
             nameTextView[1].setScaleY(AndroidUtilities.lerp(NAME_SCALE_FIRST_EXPANSION, NAME_SCALE_FULL_EXPANSION, value));
         }
@@ -712,12 +727,13 @@ public class ProfileToolbarHelper {
         }
 
         needLayoutText(Math.min(1f, extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD), extraHeight, mediaHeaderAnimationProgress);
-
-        float textWidth = nameTextView[1].getTextWidth();
-        float extraSizeBecauseOfScaling = (textWidth * NAME_SCALE_FULL_EXPANSION - textWidth * NAME_SCALE_FIRST_EXPANSION)/2;
-        nameX = AndroidUtilities.lerp(getTextCenterX(nameTextView[1]), AndroidUtilities.dp(-48)+extraSizeBecauseOfScaling, value);
+        //todo check here about scale
+        float textWidthFull = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
+        float textWidthHalfExpand = getTextCorrectWidth(nameTextView[1], 1f, true);
+        float extraSizeBecauseOfScaling = (textWidthFull - textWidthHalfExpand)/2;
+        nameX = AndroidUtilities.lerp(getTextCenterX(nameTextView[1], true), dp(-48) + extraSizeBecauseOfScaling * 2, value);
         nameY = AndroidUtilities.lerp(getNameYForPhase2And3(extraHeight), getNameYForPhase2And3(extraHeight), value);
-        onlineX = AndroidUtilities.lerp(getTextCenterX(onlineTextView[1]), AndroidUtilities.dp(-48), value);
+        onlineX = AndroidUtilities.lerp(getTextCenterX(onlineTextView[1], false), dp(-48), value);
         onlineY = nameY + GAP_BETWEEN_NAME_AND_ONLINE_TEXT;
 
         nameTextView[1].setTranslationX(nameX);
@@ -728,6 +744,11 @@ public class ProfileToolbarHelper {
         mediaCounterTextView.setTranslationY(onlineY);
 
         nameTextView[1].setTextColor(ColorUtils.blendARGB(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_profile_title), Color.WHITE, value));
+
+        nameTextView[1].requestLayout();
+        onlineTextView[1].requestLayout();
+        mediaCounterTextView.requestLayout();
+
         actionBar.setItemsColor(ColorUtils.blendARGB(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_actionBarDefaultIcon), Color.WHITE, value), false);
         actionBar.setMenuOffsetSuppressed(true);
 
@@ -749,19 +770,36 @@ public class ProfileToolbarHelper {
         fireUpdateCollectibleHintCallback();
     }
 
+    /**
+     * Used to return the correct width ( text, icons at sides )
+     * @param textView
+     * @return
+     */
+    public static float getTextCorrectWidth(SimpleTextView textView, float scale, boolean isNameText){
+        if(scale == 0f){
+            scale = textView.getScaleX();
+        }
+        Log.e("TextIssue","getTextCorrectWidth  scale="+scale+"  widthbeforeScale"+textView.getPaint().measureText(textView.getText().toString())+"    widthWithScale="+textView.getPaint().measureText(textView.getText().toString()) * scale+"        sideDrawbaleSize = "+textView.getSideDrawablesSize());
+        if(isNameText){
+            return textView.getPaint().measureText(textView.getText().toString()) * scale + textView.getSideDrawablesSize();
+        } else {
+            return textView.getPaint().measureText(textView.getText().toString()) * scale + textView.getRightDrawableWidth();
+        }
+    }
+
     public void needLayoutText(float diff, float extraHeight, float mediaHeaderAnimationProgress) {
         final AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView = referenceCallback.getMediaCounterTextView();
         final ProfileActivity.PagerIndicatorView avatarsViewPagerIndicatorView = referenceCallback.getIndicatorView();
 
         FrameLayout.LayoutParams layoutParams;
         float scale = nameTextView[1].getScaleX();
-        float maxScale = extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD ? 1.67f : 1.12f;
+        float maxScale = extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD ? NAME_SCALE_FULL_EXPANSION : NAME_SCALE_FIRST_EXPANSION;
 
         if (extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD && scale != maxScale) {
             return;
         }
 
-        int viewWidth = AndroidUtilities.isTablet() ? AndroidUtilities.dp(490) : AndroidUtilities.displaySize.x;
+        int viewWidth = AndroidUtilities.isTablet() ? dp(490) : AndroidUtilities.displaySize.x;
         ActionBarMenuItem item = avatarsViewPagerIndicatorView.getSecondaryMenuItem();
         int extra = 0;
 //        if (editItemVisible) { //todo can be removed later
@@ -770,28 +808,57 @@ public class ProfileToolbarHelper {
 //        if (searchItem != null) {
 //            extra += 48;
 //        }
-        int buttonsWidth = AndroidUtilities.dp(ProfileToolbarHelper.TOOLBAR_TEXT_INITIAL_START_MARGIN + 8 + (40 + extra * (1.0f - mediaHeaderAnimationProgress)));
+        if(diff == 1f){
+//            Log.e("TextIssue","needLayoutText diff == 1f");
+            int availableScreenWidth = viewWidth - dp(32f);
+            float objectWidth = getTextCorrectWidth(nameTextView[1], nameTextView[1].getScaleX(), true);
+            FrameLayout.LayoutParams nameTextLp = (FrameLayout.LayoutParams) nameTextView[1].getLayoutParams();
+            if(objectWidth < availableScreenWidth){
+                nameTextLp.width = (int) Math.ceil(objectWidth);
+                Log.e("TextIssue","needLayoutText #1 objectWidth="+nameTextLp.width);
+            } else {
+                Log.e("TextIssue","needLayoutText #2 availableScreenWidth="+availableScreenWidth);
+                nameTextLp.width = availableScreenWidth;
+            }
+            nameTextView[1].setLayoutParams(nameTextLp);
+            nameTextView[1].requestLayout();
+
+            objectWidth = getTextCorrectWidth(onlineTextView[1], 1f, false);
+            int onlineTextFinalWidth;
+            if(objectWidth < availableScreenWidth){
+                onlineTextFinalWidth = LayoutHelper.WRAP_CONTENT;
+            } else {
+                onlineTextFinalWidth = availableScreenWidth;
+            }
+            onlineTextView[1].getLayoutParams().width = onlineTextFinalWidth;
+            onlineTextView[2].getLayoutParams().width = onlineTextFinalWidth;
+            onlineTextView[3].getLayoutParams().width = onlineTextFinalWidth;
+
+            onlineTextView[1].requestLayout();
+            onlineTextView[2].requestLayout();
+            onlineTextView[3].requestLayout();
+            return;
+        }
+
+        int buttonsWidth = dp(ProfileToolbarHelper.TOOLBAR_TEXT_INITIAL_START_MARGIN + 8 + (40 + extra * (1.0f - mediaHeaderAnimationProgress)));
         int minWidth = viewWidth - buttonsWidth;
 
         int width = (int) (viewWidth - buttonsWidth * Math.max(0.0f, 1.0f - (diff != 1.0f ? diff * 0.15f / (1.0f - diff) : 1.0f)) - nameTextView[1].getTranslationX());
-        float width2 = nameTextView[1].getPaint().measureText(nameTextView[1].getText().toString()) * scale + nameTextView[1].getSideDrawablesSize();
+        float width2 = getTextCorrectWidth(nameTextView[1], nameTextView[1].getScaleX(), true);
         layoutParams = (FrameLayout.LayoutParams) nameTextView[1].getLayoutParams();
-        int prevWidth = layoutParams.width;
         if (width < width2) {
-            layoutParams.width = Math.max(minWidth, (int) Math.ceil((width - AndroidUtilities.dp(24)) / (scale + ((maxScale - scale) * 7.0f))));
+            layoutParams.width = Math.max(minWidth, (int) Math.ceil((width - dp(24)) / (scale + ((maxScale - scale) * 7.0f))));
         } else {
             layoutParams.width = (int) Math.ceil(width2);
         }
-        layoutParams.width = (int) Math.min((viewWidth - nameTextView[1].getX()) / scale - AndroidUtilities.dp(8), layoutParams.width);
-        if (layoutParams.width != prevWidth) {
-            nameTextView[1].requestLayout();
-        }
+        nameTextView[1].setLayoutParams(layoutParams);
+        nameTextView[1].requestLayout();
 
         width2 = onlineTextView[1].getPaint().measureText(onlineTextView[1].getText().toString()) + onlineTextView[1].getRightDrawableWidth();
         layoutParams = (FrameLayout.LayoutParams) onlineTextView[1].getLayoutParams();
         FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) mediaCounterTextView.getLayoutParams();
-        prevWidth = layoutParams.width;
-        layoutParams2.rightMargin = layoutParams.rightMargin = (int) Math.ceil(onlineTextView[1].getTranslationX() + AndroidUtilities.dp(8) + AndroidUtilities.dp(40) * (1.0f - diff));
+        int prevWidth = layoutParams.width;
+        layoutParams2.rightMargin = layoutParams.rightMargin = (int) Math.ceil(onlineTextView[1].getTranslationX() + dp(8) + dp(40) * (1.0f - diff)); //todo should remove it i guess
         if (width < width2) {
             layoutParams2.width = layoutParams.width = (int) Math.ceil(width);
         } else {

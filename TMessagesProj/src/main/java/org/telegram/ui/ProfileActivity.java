@@ -19,6 +19,8 @@ import static org.telegram.ui.Stars.StarsIntroActivity.formatStarsAmountShort;
 import static org.telegram.ui.bots.AffiliateProgramFragment.percents;
 import static org.telegram.ui.screens.profile.ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE;
 import static org.telegram.ui.screens.profile.ProfileToolbarHelper.MIN_PROFILE_IMAGE_CIRCLE_SIZE;
+import static org.telegram.ui.screens.profile.ProfileToolbarHelper.NAME_SCALE_FIRST_EXPANSION;
+import static org.telegram.ui.screens.profile.ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -2764,7 +2766,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             searchItem.setVisibility(GONE);
                         }
                         nameTextView[1].setTextColor(Color.WHITE);
-                        nameTextView[1].setPivotY(nameTextView[1].getMeasuredHeight());
                         nameTextView[1].setScaleX(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
                         nameTextView[1].setScaleY(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
                         if (scamDrawable != null) {
@@ -6903,16 +6904,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         expandAnimatorValues,
                         extraHeight
                 );
-
-                //                if(listViewFullExpandSnappingPoint < 0 && isPulledDown){
-//                    Log.e("OMID", "####2  BOOOOOOOOOOOOOMOOOOOOOOOOOOOOOOOOO");
-//                    if(!expandAnimator.isRunning()) {
-////                        isPulledDown = profileToolbarHelper.startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
-//                        isPulledDown = profileToolbarHelper.startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, getMessagesController().isChatNoForwards(currentChat));
-//                    }
-//                 } else {
-//
-//                }
             }
 
             if (openAnimationInProgress && playProfileAnimation == 2) {
@@ -6926,7 +6917,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 nameTextView[0].setScaleX(1.0f);
                 nameTextView[0].setScaleY(1.0f);
 
-                nameTextView[1].setPivotY(nameTextView[1].getMeasuredHeight());
                 nameTextView[1].setScaleX(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
                 nameTextView[1].setScaleY(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
 
@@ -7800,11 +7790,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
 
                 if (playProfileAnimation != 2) {
-                    int width = (int) Math.ceil(AndroidUtilities.displaySize.x - AndroidUtilities.dp(118 + 8) + 21 * AndroidUtilities.density);
-                    float width2 = nameTextView[1].getPaint().measureText(nameTextView[1].getText().toString()) * 1.12f + nameTextView[1].getSideDrawablesSize();
+                    //todo here can improve
+                    int width = (int) Math.ceil(AndroidUtilities.displaySize.x - AndroidUtilities.dp(118 + 8));
+                    float width2 = ProfileToolbarHelper.getTextCorrectWidth(nameTextView[1], NAME_SCALE_FIRST_EXPANSION, true);
                     FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) nameTextView[1].getLayoutParams();
                     if (width < width2) {
-                        layoutParams.width = (int) Math.ceil(width / 1.12f);
+                        layoutParams.width = (int) Math.ceil(width / NAME_SCALE_FIRST_EXPANSION);
                     } else {
                         layoutParams.width = LayoutHelper.WRAP_CONTENT;
                     }
@@ -7813,7 +7804,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     initialAnimationExtraHeight = ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD;
                 } else {
                     FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) nameTextView[1].getLayoutParams();
-                    layoutParams.width = (int) ((AndroidUtilities.displaySize.x - AndroidUtilities.dp(32)) / 1.67f);
+                    layoutParams.width = (int) ((AndroidUtilities.displaySize.x - AndroidUtilities.dp(32)) / NAME_SCALE_FULL_EXPANSION);
                     nameTextView[1].setLayoutParams(layoutParams);
                 }
                 fragmentView.setBackgroundColor(0);
