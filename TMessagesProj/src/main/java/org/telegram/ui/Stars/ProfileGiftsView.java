@@ -15,18 +15,13 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stars;
-import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -360,15 +355,19 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
         validPositions = new ArrayList<>();
         float rectBottom = rect.y+ rect.height;
         float rectRight = rect.x+ rect.width;
-        final float boundSize = GIFT_BOUND_SIZE;
+        final float EXTRA_GAP = dp(2);
+        final float boundSize = GIFT_BOUND_SIZE + EXTRA_GAP;
         final float CENTER_AVATAR_X_SAFE_ZONE = circleRadius / 2;
 
         final int TOOLBAR_BACK_BUTTON_END_Y = AndroidUtilities.dp(48) + AndroidUtilities.statusBarHeight;
         final int TOOLBAR_BACK_BUTTON_END_X = AndroidUtilities.dp(48) ;
+
+        Random random = new Random();
+
         // 1. Generate all valid positions
         for (float y = rect.y + boundSize/2; y <= rectBottom - boundSize/2; y += boundSize) {
-            if(y<AndroidUtilities.statusBarHeight/2) continue;
-            for (float x = rect.x + boundSize/2; x <= rectRight - boundSize/2; x += boundSize) {
+            if(y<AndroidUtilities.statusBarHeight) continue;
+            for (float x = rect.x + boundSize/2 + random.nextInt((int)boundSize/2); x <= rectRight - boundSize/2; x += boundSize) {
                 if(y < TOOLBAR_BACK_BUTTON_END_Y && x < TOOLBAR_BACK_BUTTON_END_X) continue; //should not paint on back button
                 if(x < TOOLBAR_BACK_BUTTON_END_X) continue; //should not paint on back button
                 if(y - rect.y < TOOLBAR_BACK_BUTTON_END_Y && rect.width - x < TOOLBAR_BACK_BUTTON_END_X) continue; //should not paint on setting icon at right
@@ -394,7 +393,6 @@ public class ProfileGiftsView extends View implements NotificationCenter.Notific
         List<GiftPosition> result = new ArrayList<>();
         List<GiftPosition> leftResults = new ArrayList<>();
         List<GiftPosition> rightResults = new ArrayList<>();
-        Random random = new java.util.Random();
         int l = 0, r = 0;
         for (int i = 0; i < MAX_GIFT_LIMIT; i++) {
             if (i % 2 == 0 && l < left.size()) {

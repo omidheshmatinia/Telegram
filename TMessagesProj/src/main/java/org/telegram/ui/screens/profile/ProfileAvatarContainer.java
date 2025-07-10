@@ -57,7 +57,12 @@ public class ProfileAvatarContainer extends FrameLayout {
         blurredView.setAlpha(blurredAlpha);
 
         invalidate();
-        curvedAnimationLayout.update();
+        if(progress == 0f || progress == 1f){
+            curvedAnimationLayout.setVisibility(View.GONE);
+        } else {
+            curvedAnimationLayout.setVisibility(View.VISIBLE);
+            curvedAnimationLayout.update();
+        }
     }
 
 
@@ -71,7 +76,7 @@ public class ProfileAvatarContainer extends FrameLayout {
         ViewParent parent = getParent();
         if (parent instanceof FrameLayout && !isCurvedAnimationAttached) {
             isCurvedAnimationAttached = true;
-            ((FrameLayout) parent).addView(curvedAnimationLayout, 0, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+            ((FrameLayout) parent).addView(curvedAnimationLayout, 1, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT)); // it should be above background profile emojis
         }
     }
 
@@ -164,10 +169,8 @@ public class ProfileAvatarContainer extends FrameLayout {
         final float THRESH_HOLD_FOR_MAX_HEIGHT = dp(12);
         float avatarStartSize = ProfileToolbarHelper.MIN_PROFILE_IMAGE_CIRCLE_SIZE;
 
-
         private float getCirclePointComparedToCenterWhenItCutScreen(float radius, float bottomOffset) {
-            float dx = (float) Math.sqrt(2 * radius * bottomOffset - bottomOffset * bottomOffset);
-            return dx;
+            return (float) Math.sqrt(2 * radius * bottomOffset - bottomOffset * bottomOffset);
         }
 
         final float MIN_DROP_WIDTH = dp(16);

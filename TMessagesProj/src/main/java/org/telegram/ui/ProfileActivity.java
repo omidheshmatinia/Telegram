@@ -1300,12 +1300,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 progress = Math.max(0f, Math.min(1f, progress * 1.3f)); // clamp between 0 and 1
                 IconPosition position = iconPositions.get(i);
 
-                float x = position.x+ (int) avatarCenterX;
-                float y = position.y+ (int) avatarCenterY;
-                final float scale = lerp((i + 1) * 0.1f, 1.0f, progress);
+                float newCenterYDestination = AndroidUtilities.lerp(avatarY, avatarY + avatarContainer.getHeight(), progress);
+                float x = position.x + (int) avatarCenterX;
+                float y = position.y + (int) avatarCenterY;
+                final float scale = lerp(0.7f, 1.0f, progress);
                 x = AndroidUtilities.lerp(avatarCenterX, x, progress);
-                y = AndroidUtilities.lerp(avatarCenterY, y, progress);
-                float alpha = AndroidUtilities.lerp(0, position.alpha, progress);
+                y = AndroidUtilities.lerp(newCenterYDestination, y, progress);
+                float alpha = AndroidUtilities.lerp(0.4f, position.alpha, progress);
                 final float size = position.size * scale;
                 emoji.setBounds(
                         (int) (x - size / 2),
@@ -1321,17 +1322,41 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         private Rect blurBounds = new Rect();
 
+        /**
+         * [ -- -- -- -- -- Y3 -- -- -- -- -- Y4 -- -- -- -- -- ]
+         * [ -- -- -- -- -- -- -- -- X1 -- -- -- -- -- -- -- -- ]
+         * [ -- -- Z4 -- -- -- -- -- -- -- -- -- -- -- Z1 -- -- ]
+         * [ -- -- -- -- -- X8 -- -- 00 -- -- X5 -- -- -- -- -- ]
+         * [ -- -- -- -- -- -- -- 00 00 00 -- -- -- -- -- -- -- ]
+         * [ -- -- -- -- -- -- 00 00 00 00 00 -- -- -- -- -- -- ]
+         * [ Y5 -- -- X3 -- 00 00 00 00 00 00 00 -- X4 -- -- Y6 ]
+         * [ -- -- -- -- -- -- 00 00 00 00 00 -- -- -- -- -- -- ]
+         * [ -- -- -- -- -- -- -- 00 00 00 -- -- -- -- -- -- -- ]
+         * [ -- -- -- -- -- X7 -- -- 00 -- -- X6 -- -- -- -- -- ]
+         * [ -- -- Z3 -- -- -- -- -- -- -- -- -- -- -- Z2 -- -- ]
+         * [ -- -- -- -- -- -- -- -- X2 -- -- -- -- -- -- -- -- ]
+         * [ -- -- -- -- -- Y1 -- -- -- -- -- Y2 -- -- -- -- -- ]
+         */
+        private final float HALF_CIRCLE_SIZE = MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2;
         private final float[] profilePositionsAccordingToCenter = new float[] {
-                (float) 0, MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(18) , dp(24), 0.3f,
-                (float) 0, -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(18) , dp(24), 0.3f,
-                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(40), 0 , dp(24), 0.3f,
-                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(92), 0 , dp(20), 0.18f,
-                (float)  MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(92), 0 , dp(20), 0.18f,
-                (float)  MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(40), 0 , dp(24), 0.3f,
-                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12), (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12) , dp(24), 0.3f,
-                (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12), (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12) , dp(24), 0.3f,
-                (float) -MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , dp(24), 0.3f,
-                (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 + dp(12), (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE /2 - dp(12) , dp(24), 0.3f,
+                -HALF_CIRCLE_SIZE - dp(12), -HALF_CIRCLE_SIZE + dp(8) , dp(24), 0.3f, // X8
+                HALF_CIRCLE_SIZE + dp(12), -HALF_CIRCLE_SIZE + dp(8) , dp(24), 0.3f, // X5
+                -HALF_CIRCLE_SIZE - dp(52), HALF_CIRCLE_SIZE + dp(6) , dp(20), 0.24f, // Z3
+                HALF_CIRCLE_SIZE - dp(3), HALF_CIRCLE_SIZE + dp(28) , dp(18), 0.18f, // Y2
+                -HALF_CIRCLE_SIZE - dp(52), -HALF_CIRCLE_SIZE - dp(6) , dp(20), 0.24f, // Z4
+                HALF_CIRCLE_SIZE + dp(52), HALF_CIRCLE_SIZE + dp(6) , dp(20), 0.24f, // Z2
+                -HALF_CIRCLE_SIZE + dp(3), HALF_CIRCLE_SIZE + dp(28) , dp(18), 0.18f, // Y1
+                -HALF_CIRCLE_SIZE - dp(92), -2 , dp(20), 0.18f, // Y5
+                -HALF_CIRCLE_SIZE - dp(12) , HALF_CIRCLE_SIZE - dp(8) , dp(24), 0.3f, // X7
+                HALF_CIRCLE_SIZE + dp(52), -HALF_CIRCLE_SIZE - dp(6) , dp(20), 0.24f, // Z1
+                0f, HALF_CIRCLE_SIZE + dp(18) , dp(24), 0.3f, // X2
+                HALF_CIRCLE_SIZE + dp(12), HALF_CIRCLE_SIZE - dp(8) , dp(24), 0.3f, // X6
+                HALF_CIRCLE_SIZE + dp(92), -2 , dp(20), 0.18f, // Y6
+                -HALF_CIRCLE_SIZE + dp(3), -HALF_CIRCLE_SIZE - dp(28) , dp(18), 0.18f, // Y3
+                0f, -HALF_CIRCLE_SIZE - dp(18) , dp(24), 0.3f, // X1
+                HALF_CIRCLE_SIZE - dp(3), -HALF_CIRCLE_SIZE - dp(28) , dp(18), 0.18f, // Y4
+                -HALF_CIRCLE_SIZE - dp(40), 0 , dp(24), 0.3f, // X3
+                HALF_CIRCLE_SIZE + dp(40), 0 , dp(24), 0.3f, // X4
         };
 
         private class IconPosition {

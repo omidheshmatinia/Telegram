@@ -246,7 +246,6 @@ public class ProfileToolbarHelper {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            Log.e("Blurred","onDraw is Called");
             drawable.draw(canvas);
             drawable.invalidate();
         }
