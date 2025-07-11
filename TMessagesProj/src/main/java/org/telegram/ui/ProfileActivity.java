@@ -5537,7 +5537,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void collapseAvatarInstant() {
-        Log.e("ThirdPhase","collapseAvatarInstant");
         if (allowPullingDown && currentExpandAnimatorValue > 0) {
             layoutManager.scrollToPositionWithOffset(0, ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD - listView.getPaddingTop());
             listView.post(() -> {
@@ -9894,6 +9893,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
             }
         } else if (chatId != 0) {
+            profileToolbarHelper.isMsgVisible = isMessageButtonVisible();
             TLRPC.Chat chat = getMessagesController().getChat(chatId);
             hasVoiceChatItem = false;
 
@@ -10026,6 +10026,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             sharedMediaLayout.getSearchItem().requestLayout();
         }
         updateStoriesViewBounds(false);
+    }
+
+    private boolean isMessageButtonVisible() {
+        return ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatInfo != null && chatInfo.linked_chat_id != 0 && infoHeaderRow != -1;
     }
 
     private boolean checkNotificationIsMuteOrNot() {

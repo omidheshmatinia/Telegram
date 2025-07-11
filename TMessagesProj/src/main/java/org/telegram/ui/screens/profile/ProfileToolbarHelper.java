@@ -98,6 +98,7 @@ public class ProfileToolbarHelper {
     public boolean isCallItemVisible = false;
     public boolean isMyProfile = false;
     public boolean isMuteMode = false;
+    public boolean isMsgVisible = true;
 
     private final ProfileActivityReferenceCallback referenceCallback;
 
@@ -306,18 +307,16 @@ public class ProfileToolbarHelper {
         toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView, resourcesProvider, clickListener);
         masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
-        items.add(ProfileToolbarButtonItem.Message);
+        if(isMsgVisible){
+            items.add(ProfileToolbarButtonItem.Message);
+        }
+        if(otherItem.hasSubItem(view_discussion)){
+            items.add(ProfileToolbarButtonItem.Discuss);
+        }
         if(isMuteMode){
             items.add(ProfileToolbarButtonItem.UnMute);
         } else {
             items.add(ProfileToolbarButtonItem.Mute);
-        }
-
-        if(otherItem.hasSubItem(leave_group)){
-            items.add(ProfileToolbarButtonItem.Leave);
-        }
-        if(otherItem.hasSubItem(view_discussion)){
-            items.add(ProfileToolbarButtonItem.Discuss);
         }
         if(otherItem.hasSubItem(gift_premium)){
             items.add(ProfileToolbarButtonItem.Gift);
@@ -327,6 +326,9 @@ public class ProfileToolbarHelper {
         }
         if(isVideoCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Video);
+        }
+        if(otherItem.hasSubItem(leave_group)){
+            items.add(ProfileToolbarButtonItem.Leave);
         }
         if(isMyProfile) {
             items.add(ProfileToolbarButtonItem.AddStory);
