@@ -6977,6 +6977,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 listView.scrollBy(0, view.getTop() - ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD);
             }
         }
+        profileToolbarHelper.setupGifts();
         fixLayout();
     }
 

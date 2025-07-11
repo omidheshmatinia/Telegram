@@ -84,7 +84,6 @@ public class ProfileToolbarHelper {
     private float onlineX = 0f;
     private float onlineY = 0f;
     private float avatarY = 0f;
-    private final int screenWidth = AndroidUtilities.displaySize.x;
     public boolean isVideoCallItemVisible = false;
     public boolean isCallItemVisible = false;
 
@@ -102,7 +101,16 @@ public class ProfileToolbarHelper {
     }
 
     public void setupGifts(){
-        final Rect avatarRect = new Rect(0, 0, screenWidth , getNameEndYForPhase1());
+        int screenWidth = AndroidUtilities.displaySize.x;
+        boolean isLandscape = AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y;
+        Rect avatarRect;
+        if(isLandscape || AndroidUtilities.isTablet()){
+            float maxWidth = dp(420);
+            float x= (AndroidUtilities.displaySize.x - maxWidth)/2;
+            avatarRect = new Rect(x, 0, maxWidth , getNameEndYForPhase1());
+        } else {
+            avatarRect = new Rect(0, 0, screenWidth , getNameEndYForPhase1());
+        }
         referenceCallback.getGiftsView().update();
         referenceCallback.getGiftsView().setGiftsViewBounds(avatarRect, screenWidth / 2, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2 + AndroidUtilities.statusBarHeight, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2);
     }
