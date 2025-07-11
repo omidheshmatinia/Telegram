@@ -17,6 +17,21 @@ import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Stars.StarsIntroActivity.formatStarsAmountShort;
 import static org.telegram.ui.bots.AffiliateProgramFragment.percents;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.AddStory;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Call;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Discuss;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Gift;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Join;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Leave;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.LiveStream;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Message;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Mute;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Report;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Share;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Stop;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.UnMute;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.Video;
+import static org.telegram.ui.screens.profile.ProfileToolbarButtonItem.VoiceChat;
 import static org.telegram.ui.screens.profile.ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE;
 import static org.telegram.ui.screens.profile.ProfileToolbarHelper.MIN_PROFILE_IMAGE_CIRCLE_SIZE;
 import static org.telegram.ui.screens.profile.ProfileToolbarHelper.NAME_SCALE_FIRST_EXPANSION;
@@ -518,7 +533,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int share_contact = 3;
     private final static int edit_contact = 4;
     private final static int delete_contact = 5;
-    private final static int leave_group = 7;
+    public final static int leave_group = 7;
     private final static int invite_to_group = 9;
     private final static int share = 10;
     private final static int edit_channel = 12;
@@ -530,9 +545,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int statistics = 19;
     private final static int start_secret_chat = 20;
     public final static int gallery_menu_save = 21;
-    private final static int view_discussion = 22;
+    public final static int view_discussion = 22;
     private final static int delete_topic = 23;
-    private final static int report = 24;
+    public final static int report = 24;
 
     private final static int edit_info = 30;
     public final static int logout = 31;
@@ -541,7 +556,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     public final static int edit_avatar = 34;
     public final static int delete_avatar = 35;
     public final static int add_photo = 36;
-    private final static int gift_premium = 38;
+    public final static int gift_premium = 38;
     private final static int channel_stories = 39;
     private final static int edit_color = 40;
     private final static int edit_profile = 41;
@@ -2359,39 +2374,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     });
                     presentFragment(fragment);
                 } else if (id == share) {
-                    try {
-                        String text = null;
-                        if (userId != 0) {
-                            TLRPC.User user = getMessagesController().getUser(userId);
-                            if (user == null) {
-                                return;
-                            }
-                            if (botInfo != null && userInfo != null && !TextUtils.isEmpty(userInfo.about)) {
-                                text = String.format("%s https://" + getMessagesController().linkPrefix + "/%s", userInfo.about, UserObject.getPublicUsername(user));
-                            } else {
-                                text = String.format("https://" + getMessagesController().linkPrefix + "/%s", UserObject.getPublicUsername(user));
-                            }
-                        } else if (chatId != 0) {
-                            TLRPC.Chat chat = getMessagesController().getChat(chatId);
-                            if (chat == null) {
-                                return;
-                            }
-                            if (chatInfo != null && !TextUtils.isEmpty(chatInfo.about)) {
-                                text = String.format("%s\nhttps://" + getMessagesController().linkPrefix + "/%s", chatInfo.about, ChatObject.getPublicUsername(chat));
-                            } else {
-                                text = String.format("https://" + getMessagesController().linkPrefix + "/%s", ChatObject.getPublicUsername(chat));
-                            }
-                        }
-                        if (TextUtils.isEmpty(text)) {
-                            return;
-                        }
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        intent.putExtra(Intent.EXTRA_TEXT, text);
-                        startActivityForResult(Intent.createChooser(intent, LocaleController.getString(R.string.BotShare)), 500);
-                    } catch (Exception e) {
-                        FileLog.e(e);
-                    }
+                    toolbarShareButtonClicked();
                 } else if (id == add_shortcut) {
                     try {
                         long did;
@@ -2426,17 +2409,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } else if (id == view_discussion) {
                     openDiscussion();
                 } else if (id == gift_premium) {
-                    if (userInfo != null && UserObject.areGiftsDisabled(userInfo)) {
-                        BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
-                        if (lastFragment != null) {
-                            BulletinFactory.of(lastFragment).createSimpleBulletin(R.raw.error, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.UserDisallowedGifts, DialogObject.getShortName(getDialogId())))).show();
-                        }
-                        return;
-                    }
-                    if (currentChat != null) {
-                        MessagesController.getGlobalMainSettings().edit().putInt("channelgifthint", 3).apply();
-                    }
-                    showDialog(new GiftSheet(getContext(), currentAccount, getDialogId(), null, null));
+                    toolbarGiftItemClicked();
                 } else if (id == channel_stories) {
                     Bundle args = new Bundle();
                     args.putInt("type", MediaActivity.TYPE_ARCHIVED_CHANNEL_STORIES);
@@ -5062,7 +5035,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
               profileToolbarHelper.setupGifts();
             }
         });
-        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2, item -> {
+        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2, otherItem , item -> {
             switch (item){
                 case Message:
                     onWriteButtonClick();
@@ -5072,6 +5045,33 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     break;
                 case Video:
                     onCallOrVideoCallClicked(true);
+                    break;
+                case Leave:
+                    leaveChatPressed();
+                    break;
+                case VoiceChat:
+                    break;
+                case Join:
+                    break;
+                case Report:
+                    ReportBottomSheet.openChat(ProfileActivity.this, getDialogId());
+                    break;
+                case Share:
+                    toolbarShareButtonClicked();
+                    break;
+                case Discuss:
+                    openDiscussion();
+                    break;
+                case Stop:
+                    break;
+                case Gift:
+                    toolbarGiftItemClicked(); //todo when to show gift item
+                    break;
+                case AddStory:
+                    break;
+                case LiveStream:
+                    break;
+                case Mute:
                     break;
                 case UnMute:
                     break;
@@ -5247,6 +5247,42 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return fragmentView;
     }
 
+    private void toolbarShareButtonClicked() {
+        try {
+            String text = null;
+            if (userId != 0) {
+                TLRPC.User user = getMessagesController().getUser(userId);
+                if (user == null) {
+                    return;
+                }
+                if (botInfo != null && userInfo != null && !TextUtils.isEmpty(userInfo.about)) {
+                    text = String.format("%s https://" + getMessagesController().linkPrefix + "/%s", userInfo.about, UserObject.getPublicUsername(user));
+                } else {
+                    text = String.format("https://" + getMessagesController().linkPrefix + "/%s", UserObject.getPublicUsername(user));
+                }
+            } else if (chatId != 0) {
+                TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                if (chat == null) {
+                    return;
+                }
+                if (chatInfo != null && !TextUtils.isEmpty(chatInfo.about)) {
+                    text = String.format("%s\nhttps://" + getMessagesController().linkPrefix + "/%s", chatInfo.about, ChatObject.getPublicUsername(chat));
+                } else {
+                    text = String.format("https://" + getMessagesController().linkPrefix + "/%s", ChatObject.getPublicUsername(chat));
+                }
+            }
+            if (TextUtils.isEmpty(text)) {
+                return;
+            }
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, text);
+            startActivityForResult(Intent.createChooser(intent, LocaleController.getString(R.string.BotShare)), 500);
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
     private void onCallOrVideoCallClicked(boolean isVideoCall) {
         if (userId != 0) {
             TLRPC.User user = getMessagesController().getUser(userId);
@@ -5279,6 +5315,20 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     boolean floatingHidden;
     float floatingButtonHideProgress;
     boolean showBoostsAlert;
+
+    private void toolbarGiftItemClicked(){
+        if (userInfo != null && UserObject.areGiftsDisabled(userInfo)) {
+            BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
+            if (lastFragment != null) {
+                BulletinFactory.of(lastFragment).createSimpleBulletin(R.raw.error, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.UserDisallowedGifts, DialogObject.getShortName(getDialogId())))).show();
+            }
+            return;
+        }
+        if (currentChat != null) {
+            MessagesController.getGlobalMainSettings().edit().putInt("channelgifthint", 3).apply();
+        }
+        showDialog(new GiftSheet(getContext(), currentAccount, getDialogId(), null, null));
+    }
 
     private final AccelerateDecelerateInterpolator floatingInterpolator = new AccelerateDecelerateInterpolator();
 

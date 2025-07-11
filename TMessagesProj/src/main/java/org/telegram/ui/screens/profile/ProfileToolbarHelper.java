@@ -5,8 +5,12 @@ import static org.telegram.ui.ProfileActivity.add_photo;
 import static org.telegram.ui.ProfileActivity.delete_avatar;
 import static org.telegram.ui.ProfileActivity.edit_avatar;
 import static org.telegram.ui.ProfileActivity.gallery_menu_save;
+import static org.telegram.ui.ProfileActivity.gift_premium;
+import static org.telegram.ui.ProfileActivity.leave_group;
 import static org.telegram.ui.ProfileActivity.logout;
+import static org.telegram.ui.ProfileActivity.report;
 import static org.telegram.ui.ProfileActivity.set_as_main;
+import static org.telegram.ui.ProfileActivity.view_discussion;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -282,7 +286,7 @@ public class ProfileToolbarHelper {
     }
 
     private ViewPagerBlurredBottom viewPagerBlurredBottom;
-    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView, ProfileToolbarButtonsRowLayout.ToolbarButtonClickCallback clickListener) {
+    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView, ActionBarMenuItem otherItem, ProfileToolbarButtonsRowLayout.ToolbarButtonClickCallback clickListener) {
 
         viewPagerBlurredBottom = new ViewPagerBlurredBottom(context, referenceCallback.getAvatarsViewPager(), masterView, resourcesProvider);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT);
@@ -294,11 +298,24 @@ public class ProfileToolbarHelper {
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
         items.add(ProfileToolbarButtonItem.Message);
         items.add(ProfileToolbarButtonItem.UnMute);
+
+        if(otherItem.hasSubItem(leave_group)){
+            items.add(ProfileToolbarButtonItem.Leave);
+        }
+        if(otherItem.hasSubItem(view_discussion)){
+            items.add(ProfileToolbarButtonItem.Discuss);
+        }
+        if(otherItem.hasSubItem(gift_premium)){
+            items.add(ProfileToolbarButtonItem.Gift);
+        }
         if(isCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Call);
         }
         if(isVideoCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Video);
+        }
+        if(otherItem.hasSubItem(report)){
+            items.add(ProfileToolbarButtonItem.Report);
         }
         toolbarButtonsLayout.setItems(items);
         toolbarButtonsLayout.setAlpha(0f);
