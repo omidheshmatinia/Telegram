@@ -282,20 +282,24 @@ public class ProfileToolbarHelper {
     }
 
     private ViewPagerBlurredBottom viewPagerBlurredBottom;
-    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView) {
+    public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView, ProfileToolbarButtonsRowLayout.ToolbarButtonClickCallback clickListener) {
 
         viewPagerBlurredBottom = new ViewPagerBlurredBottom(context, referenceCallback.getAvatarsViewPager(), masterView, resourcesProvider);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT);
         masterView.addView(viewPagerBlurredBottom, lp);
         masterView.blurBehindViews.add(viewPagerBlurredBottom);
 
-        toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView, resourcesProvider);
+        toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView, resourcesProvider, clickListener);
         masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
-        items.add(new ProfileToolbarButtonItem(R.drawable.filled_message, "Message"));
-        items.add(new ProfileToolbarButtonItem(R.drawable.filled_unmute, "Unmute"));
-        items.add(new ProfileToolbarButtonItem(R.drawable.filled_call, "Call"));
-        items.add(new ProfileToolbarButtonItem(R.drawable.filled_video, "Video")); //todo Omid it can be enum
+        items.add(ProfileToolbarButtonItem.Message);
+        items.add(ProfileToolbarButtonItem.UnMute);
+        if(isCallItemVisible) {
+            items.add(ProfileToolbarButtonItem.Call);
+        }
+        if(isVideoCallItemVisible) {
+            items.add(ProfileToolbarButtonItem.Video);
+        }
         toolbarButtonsLayout.setItems(items);
         toolbarButtonsLayout.setAlpha(0f);
     }

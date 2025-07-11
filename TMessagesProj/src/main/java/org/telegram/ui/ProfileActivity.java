@@ -293,6 +293,8 @@ import org.telegram.ui.bots.ChannelAffiliateProgramsFragment;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
 import org.telegram.ui.screens.profile.ProfileAvatarContainer;
 import org.telegram.ui.screens.profile.ProfileOverlaysView;
+import org.telegram.ui.screens.profile.ProfileToolbarButtonItem;
+import org.telegram.ui.screens.profile.ProfileToolbarButtonsRowLayout;
 import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
 import java.io.BufferedInputStream;
@@ -2407,19 +2409,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         FileLog.e(e);
                     }
                 } else if (id == call_item || id == video_call_item) {
-                    if (userId != 0) {
-                        TLRPC.User user = getMessagesController().getUser(userId);
-                        if (user != null) {
-                            VoIPHelper.startCall(user, id == video_call_item, userInfo != null && userInfo.video_calls_available, getParentActivity(), userInfo, getAccountInstance());
-                        }
-                    } else if (chatId != 0) {
-                        ChatObject.Call call = getMessagesController().getGroupCall(chatId, false);
-                        if (call == null) {
-                            VoIPHelper.showGroupCallAlert(ProfileActivity.this, currentChat, null, false, getAccountInstance());
-                        } else {
-                            VoIPHelper.startCall(currentChat, null, null, false, getParentActivity(), ProfileActivity.this, getAccountInstance());
-                        }
-                    }
+                    onCallOrVideoCallClicked(id == video_call_item);
                 } else if (id == search_members) {
                     Bundle args = new Bundle();
                     args.putLong("chat_id", chatId);
@@ -5072,7 +5062,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
               profileToolbarHelper.setupGifts();
             }
         });
-        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2);
+        profileToolbarHelper.setupToolbarButtons(getContext(), resourcesProvider, avatarContainer2, item -> {
+            switch (item){
+                case Message:
+                    onWriteButtonClick();
+                    break;
+                case Call:
+                    onCallOrVideoCallClicked(false);
+                    break;
+                case Video:
+                    onCallOrVideoCallClicked(true);
+                    break;
+                case UnMute:
+                    break;
+            }
+        });
         updateProfileData(true);
         needLayout(false);
 
@@ -5241,6 +5245,22 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         return fragmentView;
+    }
+
+    private void onCallOrVideoCallClicked(boolean isVideoCall) {
+        if (userId != 0) {
+            TLRPC.User user = getMessagesController().getUser(userId);
+            if (user != null) {
+                VoIPHelper.startCall(user, isVideoCall, userInfo != null && userInfo.video_calls_available, getParentActivity(), userInfo, getAccountInstance());
+            }
+        } else if (chatId != 0) {
+            ChatObject.Call call = getMessagesController().getGroupCall(chatId, false);
+            if (call == null) {
+                VoIPHelper.showGroupCallAlert(ProfileActivity.this, currentChat, null, false, getAccountInstance());
+            } else {
+                VoIPHelper.startCall(currentChat, null, null, false, getParentActivity(), ProfileActivity.this, getAccountInstance());
+            }
+        }
     }
 
     private void updateBottomButtonY() {
@@ -5725,6 +5745,75 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 PhotoViewer.getInstance().openPhotoWithVideo(chat.photo.photo_big, videoLocation, provider);
             }
+        }
+    }
+
+
+    private void onWriteButtonClick() {
+        if (userId != 0) {
+            if (imageUpdater != null) {
+                TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(UserConfig.getInstance(currentAccount).getClientUserId());
+                if (user == null) {
+                    user = UserConfig.getInstance(currentAccount).getCurrentUser();
+                }
+                if (user == null) {
+                    return;
+                }
+                imageUpdater.openMenu(user.photo != null && user.photo.photo_big != null && !(user.photo instanceof TLRPC.TL_userProfilePhotoEmpty), () -> {
+                    MessagesController.getInstance(currentAccount).deleteUserPhoto(null);
+                    cameraDrawable.setCurrentFrame(0);
+                    cellCameraDrawable.setCurrentFrame(0);
+                }, dialog -> {
+                    if (!imageUpdater.isUploadingImage()) {
+                        cameraDrawable.setCustomEndFrame(86);
+                        cellCameraDrawable.setCustomEndFrame(86);
+                        if (setAvatarCell != null) {
+                            setAvatarCell.getImageView().playAnimation();
+                        }
+                    } else {
+                        cameraDrawable.setCurrentFrame(0, false);
+                        cellCameraDrawable.setCurrentFrame(0, false);
+                    }
+                }, 0);
+                cameraDrawable.setCurrentFrame(0);
+                cameraDrawable.setCustomEndFrame(43);
+                cellCameraDrawable.setCurrentFrame(0);
+                cellCameraDrawable.setCustomEndFrame(43);
+                if (setAvatarCell != null) {
+                    setAvatarCell.getImageView().playAnimation();
+                }
+            } else {
+                if (playProfileAnimation != 0 && parentLayout != null && parentLayout.getFragmentStack() != null && parentLayout.getFragmentStack().size() >= 2 && parentLayout.getFragmentStack().get(parentLayout.getFragmentStack().size() - 2) instanceof ChatActivity) {
+                    finishFragment();
+                } else {
+                    TLRPC.User user = getMessagesController().getUser(userId);
+                    if (user == null || user instanceof TLRPC.TL_userEmpty) {
+                        return;
+                    }
+                    Bundle args = new Bundle();
+                    args.putLong("user_id", userId);
+                    if (!getMessagesController().checkCanOpenChat(args, ProfileActivity.this)) {
+                        return;
+                    }
+                    boolean removeFragment = arguments.getBoolean("removeFragmentOnChatOpen", true);
+                    if (!AndroidUtilities.isTablet() && removeFragment) {
+                        getNotificationCenter().removeObserver(ProfileActivity.this, NotificationCenter.closeChats);
+                        getNotificationCenter().postNotificationName(NotificationCenter.closeChats);
+                    }
+                    int distance = getArguments().getInt("nearby_distance", -1);
+                    if (distance >= 0) {
+                        args.putInt("nearby_distance", distance);
+                    }
+                    ChatActivity chatActivity = new ChatActivity(args);
+                    chatActivity.setPreloadedSticker(getMediaDataController().getGreetingsSticker(), false);
+                    presentFragment(chatActivity, removeFragment);
+                    if (AndroidUtilities.isTablet()) {
+                        finishFragment();
+                    }
+                }
+            }
+        } else {
+            openDiscussion();
         }
     }
 

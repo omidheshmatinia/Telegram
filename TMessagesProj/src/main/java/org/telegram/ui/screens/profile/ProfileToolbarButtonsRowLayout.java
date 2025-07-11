@@ -32,9 +32,11 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
     public static final int FULL_HEIGHT = BUTTON_HEIGHT + VERTICAL_SPACING * 2;
     private final Paint backgroundPaint = new Paint();
     private final Rect blurBounds = new Rect();
+    private final ToolbarButtonClickCallback buttonClickListener;
 
-    public ProfileToolbarButtonsRowLayout(Context context, SizeNotifierFrameLayout _parentNotifier, Theme.ResourcesProvider _resourcesProvider) {
+    public ProfileToolbarButtonsRowLayout(Context context, SizeNotifierFrameLayout _parentNotifier, Theme.ResourcesProvider _resourcesProvider, ToolbarButtonClickCallback buttonClickListener) {
         super(context);
+        this.buttonClickListener = buttonClickListener;
         parentNotifier = _parentNotifier;
         resourceProvider = _resourcesProvider;
         setOrientation(HORIZONTAL);
@@ -47,13 +49,18 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
         int count = items.size();
         createSpace(HORIZONTAL_SPACING);
         for (int i = 0; i < count; i++) {
-            ProfileToolbarButtonLayout childLayout = new ProfileToolbarButtonLayout(getContext(), parentNotifier, items.get(i));
+            ProfileToolbarButtonItem item = items.get(i);
+            ProfileToolbarButtonLayout childLayout = new ProfileToolbarButtonLayout(getContext(), parentNotifier, item);
             LinearLayout.LayoutParams lp = LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1f);
             if (i != 0) {
                 createSpace(MIDDLE_SPACE);
             }
             lp.bottomMargin = VERTICAL_SPACING;
             lp.topMargin = VERTICAL_SPACING;
+            childLayout.setClickable(true);
+            childLayout.setOnClickListener(view -> {
+                buttonClickListener.onItemClicked(item);
+            });
             addView(childLayout, lp);
         }
         createSpace(HORIZONTAL_SPACING);
@@ -99,5 +106,10 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
                 ((ProfileToolbarButtonLayout) child).handleAnimation(progress);
             }
         }
+    }
+
+
+    public interface ToolbarButtonClickCallback {
+        void onItemClicked(ProfileToolbarButtonItem item);
     }
 }

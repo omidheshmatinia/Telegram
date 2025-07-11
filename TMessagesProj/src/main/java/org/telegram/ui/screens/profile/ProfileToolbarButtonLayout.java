@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -63,6 +64,14 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
         super.dispatchDraw(canvas);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            performClick();
+        }
+        return super.onTouchEvent(event);
+    }
+
     public static Path createRoundedRectPath(float left, float top, float right, float bottom, int radius) {
         Path path = new Path();
         RectF rect = new RectF(left, top, right, bottom);
@@ -86,7 +95,7 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
         iconParams.gravity = Gravity.CENTER_HORIZONTAL;
         vertical.addView(icon, iconParams);
         label = new SimpleTextView(getContext());
-        label.setText(buttonInfo.label);
+        label.setText(getContext().getString(buttonInfo.label));
         label.setTextColor(Color.WHITE);
         label.setTextSize(12);
         label.setMaxLines(1);
