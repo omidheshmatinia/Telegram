@@ -6,19 +6,16 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-
-import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressLint("ViewConstructor")
@@ -33,6 +30,7 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
     private final Paint backgroundPaint = new Paint();
     private final Rect blurBounds = new Rect();
     private final ToolbarButtonClickCallback buttonClickListener;
+    private final List<ProfileToolbarButtonItem> childButtons = new ArrayList<>();
 
     public ProfileToolbarButtonsRowLayout(Context context, SizeNotifierFrameLayout _parentNotifier, Theme.ResourcesProvider _resourcesProvider, ToolbarButtonClickCallback buttonClickListener) {
         super(context);
@@ -46,6 +44,8 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
 
     public void setItems(List<ProfileToolbarButtonItem> items) {
         removeAllViews();
+        childButtons.clear();
+        childButtons.addAll(items);
         int count = items.size();
         createSpace(HORIZONTAL_SPACING);
         for (int i = 0; i < count; i++) {
@@ -57,6 +57,7 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
             }
             lp.bottomMargin = VERTICAL_SPACING;
             lp.topMargin = VERTICAL_SPACING;
+            childLayout.setTag(item);
             childLayout.setClickable(true);
             childLayout.setOnClickListener(view -> {
                 buttonClickListener.onItemClicked(item);
@@ -64,6 +65,17 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
             addView(childLayout, lp);
         }
         createSpace(HORIZONTAL_SPACING);
+    }
+
+    public int[] getMuteUnMuteCoordinates(){
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            Object tag = child.getTag();
+            if (tag == ProfileToolbarButtonItem.Mute || tag == ProfileToolbarButtonItem.UnMute) {
+                return new int[]{(int) child.getX() - AndroidUtilities.dp(5), (int) (child.getY() + getY()) - AndroidUtilities.dp(5)};
+            }
+        }
+        return null;
     }
 
     private void createSpace(int space) {
@@ -104,6 +116,37 @@ public class ProfileToolbarButtonsRowLayout extends LinearLayout {
             View child = getChildAt(a);
             if(child instanceof ProfileToolbarButtonLayout){
                 ((ProfileToolbarButtonLayout) child).handleAnimation(progress);
+            }
+        }
+    }
+
+    public void updateMuteUnMuteButton(boolean isMuteMode) {
+        ProfileToolbarButtonItem newItem = isMuteMode ? ProfileToolbarButtonItem.Mute : ProfileToolbarButtonItem.UnMute;
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            Object tag = child.getTag();
+            if (tag == ProfileToolbarButtonItem.Mute || tag == ProfileToolbarButtonItem.UnMute) {
+                // Remove the old view
+                removeViewAt(i);
+
+                // Create the new button
+                ProfileToolbarButtonLayout newButton = new ProfileToolbarButtonLayout(getContext(), parentNotifier, newItem);
+                newButton.setTag(newItem);
+                newButton.setClickable(true);
+                newButton.setOnClickListener(view -> buttonClickListener.onItemClicked(newItem));
+
+                // Use the same layout params as the old one
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
+                addView(newButton, i, lp);
+
+                // Update childButtons list
+                int btnIndex = childButtons.indexOf(tag);
+                if (btnIndex != -1) {
+                    childButtons.set(btnIndex, newItem);
+                }
+
+                break;
             }
         }
     }

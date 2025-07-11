@@ -19,7 +19,7 @@ public enum ProfileToolbarButtonItem {
     Gift(R.drawable.filled_gift, R.string.ActionStarGift),
     AddStory(R.drawable.story, R.string.AddStory),
     LiveStream(R.drawable.live_stream, R.string.VoipChannelVoiceChat),
-    Mute(R.drawable.filled_mute, R.string.VoipGroupLeave),
+    Mute(R.drawable.filled_mute, R.string.cast_mute),
     UnMute(R.drawable.filled_unmute, R.string.ChatsUnmute);
 
     public final @DrawableRes  int icon;

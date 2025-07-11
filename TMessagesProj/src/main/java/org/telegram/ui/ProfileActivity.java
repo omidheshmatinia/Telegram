@@ -3824,6 +3824,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     y += v.getY() + v.getPaddingTop();
                 }
                 chatNotificationsPopupWrapper.showAsOptions(ProfileActivity.this, view, x, y);
+                clickOnNotificationMuteUnMuteButton(did, x , y, view, false);
             } else if (position == unblockRow) {
                 getMessagesController().unblockPeer(userId);
                 if (BulletinFactory.canShowBulletin(ProfileActivity.this)) {
@@ -5047,9 +5048,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     break;
                 case LiveStream:
                     break;
-                case Mute:
-                    break;
                 case UnMute:
+                case Mute:
+                    int[] location = profileToolbarHelper.toolbarButtonsLayout.getMuteUnMuteCoordinates();
+                    if(location == null){
+                        location = new int[] {0, (int)extraHeight};
+                    }
+                    clickOnNotificationMuteUnMuteButton(getDialogId(), location[0], location[1] , contentView, true);
                     break;
             }
         });
@@ -5221,6 +5226,85 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         return fragmentView;
+    }
+
+    private void clickOnNotificationMuteUnMuteButton(long did, float x, float y, View view, boolean newToolbarMode) {
+        ChatNotificationsPopupWrapper chatNotificationsPopupWrapper = new ChatNotificationsPopupWrapper(getContext(), currentAccount, null, true, true, new ChatNotificationsPopupWrapper.Callback() {
+            @Override
+            public void toggleSound() {
+                SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
+                boolean enabled = !preferences.getBoolean("sound_enabled_" + NotificationsController.getSharedPrefKey(did, topicId), true);
+                preferences.edit().putBoolean("sound_enabled_" + NotificationsController.getSharedPrefKey(did, topicId), enabled).apply();
+                if (BulletinFactory.canShowBulletin(ProfileActivity.this)) {
+                    BulletinFactory.createSoundEnabledBulletin(ProfileActivity.this, enabled ? NotificationsController.SETTING_SOUND_ON : NotificationsController.SETTING_SOUND_OFF, getResourceProvider()).show();
+                }
+            }
+
+            @Override
+            public void muteFor(int timeInSeconds) {
+                if (timeInSeconds == 0) {
+                    if (getMessagesController().isDialogMuted(did, topicId)) {
+                        toggleMute();
+                    }
+                    if (BulletinFactory.canShowBulletin(ProfileActivity.this)) {
+                        BulletinFactory.createMuteBulletin(ProfileActivity.this, NotificationsController.SETTING_MUTE_UNMUTE, timeInSeconds, getResourceProvider()).show();
+                    }
+                } else {
+                    getNotificationsController().muteUntil(did, topicId, timeInSeconds);
+                    if (BulletinFactory.canShowBulletin(ProfileActivity.this)) {
+                        BulletinFactory.createMuteBulletin(ProfileActivity.this, NotificationsController.SETTING_MUTE_CUSTOM, timeInSeconds, getResourceProvider()).show();
+                    }
+                    updateExceptions();
+                    if (notificationsRow >= 0 && listAdapter != null) {
+                        listAdapter.notifyItemChanged(notificationsRow);
+                    }
+                }
+            }
+
+            @Override
+            public void showCustomize() {
+                if (did != 0) {
+                    Bundle args = new Bundle();
+                    args.putLong("dialog_id", did);
+                    args.putLong("topic_id", topicId);
+                    presentFragment(new ProfileNotificationsActivity(args, resourcesProvider));
+                }
+            }
+
+            @Override
+            public void toggleMute() {
+                boolean muted = getMessagesController().isDialogMuted(did, topicId);
+                getNotificationsController().muteDialog(did, topicId, !muted);
+                if (ProfileActivity.this.fragmentView != null) {
+                    BulletinFactory.createMuteBulletin(ProfileActivity.this, !muted, null).show();
+                }
+                updateExceptions();
+                if (notificationsRow >= 0 && listAdapter != null) {
+                    listAdapter.notifyItemChanged(notificationsRow);
+                }
+                profileToolbarHelper.toolbarButtonsLayout.updateMuteUnMuteButton(!checkNotificationIsMuteOrNot());
+            }
+
+            @Override
+            public void openExceptions() {
+                Bundle bundle = new Bundle();
+                bundle.putLong("dialog_id", did);
+                TopicsNotifySettingsFragments notifySettings = new TopicsNotifySettingsFragments(bundle);
+                notifySettings.setExceptions(notificationsExceptionTopics);
+                presentFragment(notifySettings);
+            }
+        }, getResourceProvider());
+        chatNotificationsPopupWrapper.update(did, topicId, notificationsExceptionTopics);
+        if (AndroidUtilities.isTablet()) {
+            View v = parentLayout.getView();
+            x += v.getX() + v.getPaddingLeft();
+            y += v.getY() + v.getPaddingTop();
+        }
+        if(newToolbarMode){
+            chatNotificationsPopupWrapper.showAsNewProfileToolbarButton(ProfileActivity.this, view, x, y);
+        } else {
+            chatNotificationsPopupWrapper.showAsOptions(ProfileActivity.this, view, x, y);
+        }
     }
 
     private void onAddStoriesClicked() {
@@ -9731,7 +9815,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (user == null) {
                 return;
             }
-            profileToolbarHelper.checkVideoCallAndCallVisibility(userInfo, myProfile);
+            profileToolbarHelper.checkVideoCallAndCallVisibility(userInfo, myProfile, checkNotificationIsMuteOrNot());
             if (UserObject.isUserSelf(user)) {
                 editItemVisible = myProfile;
                 otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
@@ -9942,6 +10026,67 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             sharedMediaLayout.getSearchItem().requestLayout();
         }
         updateStoriesViewBounds(false);
+    }
+
+    private boolean checkNotificationIsMuteOrNot() {
+        // check notification row logic
+        SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
+        long did;
+        if (dialogId != 0) {
+            did = dialogId;
+        } else if (userId != 0) {
+            did = userId;
+        } else {
+            did = -chatId;
+        }
+        String key = NotificationsController.getSharedPrefKey(did, topicId);
+        boolean enabled = false;
+        boolean custom = preferences.getBoolean("custom_" + key, false);
+        boolean hasOverride = preferences.contains("notify2_" + key);
+        int value = preferences.getInt("notify2_" + key, 0);
+        int delta = preferences.getInt("notifyuntil_" + key, 0);
+        String val;
+        if (value == 3 && delta != Integer.MAX_VALUE) {
+            delta -= getConnectionsManager().getCurrentTime();
+            if (delta <= 0) {
+                if (custom) {
+                    val = LocaleController.getString(R.string.NotificationsCustom);
+                } else {
+                    val = LocaleController.getString(R.string.NotificationsOn);
+                }
+                enabled = true;
+            } else if (delta < 60 * 60) {
+                val = formatString("WillUnmuteIn", R.string.WillUnmuteIn, LocaleController.formatPluralString("Minutes", delta / 60));
+            } else if (delta < 60 * 60 * 24) {
+                val = formatString("WillUnmuteIn", R.string.WillUnmuteIn, LocaleController.formatPluralString("Hours", (int) Math.ceil(delta / 60.0f / 60)));
+            } else if (delta < 60 * 60 * 24 * 365) {
+                val = formatString("WillUnmuteIn", R.string.WillUnmuteIn, LocaleController.formatPluralString("Days", (int) Math.ceil(delta / 60.0f / 60 / 24)));
+            } else {
+                val = null;
+            }
+        } else {
+            if (value == 0) {
+                if (hasOverride) {
+                    enabled = true;
+                } else {
+                    enabled = getNotificationsController().isGlobalNotificationsEnabled(did, false, false);
+                }
+            } else if (value == 1) {
+                enabled = true;
+            }
+            if (enabled && custom) {
+                val = LocaleController.getString(R.string.NotificationsCustom);
+            } else {
+                val = enabled ? LocaleController.getString(R.string.NotificationsOn) : LocaleController.getString(R.string.NotificationsOff);
+            }
+        }
+        if (val == null) {
+            val = LocaleController.getString(R.string.NotificationsOff);
+        }
+        if (notificationsExceptionTopics != null && !notificationsExceptionTopics.isEmpty()) {
+            val = String.format(Locale.US, LocaleController.getPluralString("NotificationTopicExceptionsDesctription", notificationsExceptionTopics.size()), val, notificationsExceptionTopics.size());
+        }
+        return val.equals(getString(R.string.NotificationsOff));
     }
 
     private void createAutoDeleteItem(Context context) {

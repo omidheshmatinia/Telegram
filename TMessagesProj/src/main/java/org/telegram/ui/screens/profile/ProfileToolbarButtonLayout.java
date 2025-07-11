@@ -67,7 +67,7 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            performClick();
+            return performClick();
         }
         return super.onTouchEvent(event);
     }

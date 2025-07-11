@@ -1,6 +1,7 @@
 package org.telegram.ui.screens.profile;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.ui.ProfileActivity.add_photo;
 import static org.telegram.ui.ProfileActivity.delete_avatar;
 import static org.telegram.ui.ProfileActivity.edit_avatar;
@@ -16,6 +17,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -35,8 +37,10 @@ import com.google.android.exoplayer2.util.Log;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 
@@ -45,6 +49,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AudioPlayerAlert;
 import org.telegram.ui.Components.BackupImageView;
@@ -65,6 +70,7 @@ import org.telegram.ui.Stars.ProfileGiftsView;
 import org.telegram.ui.Stories.ProfileStoriesView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ProfileToolbarHelper {
     public static final int MAX_PROFILE_IMAGE_CIRCLE_SIZE = dp(84);
@@ -79,7 +85,7 @@ public class ProfileToolbarHelper {
     public static final float THRESH_HOLD_FOR_AUTO_COLLAPSE = 0.30f;
 
     private ToolbarLayoutUpdateCallback toolbarLayoutUpdateCallback;
-    private ProfileToolbarButtonsRowLayout toolbarButtonsLayout;
+    public ProfileToolbarButtonsRowLayout toolbarButtonsLayout;
     private SimpleTextView[] nameTextView = new SimpleTextView[2];
     private SimpleTextView[] onlineTextView = new SimpleTextView[4];
 
@@ -91,6 +97,7 @@ public class ProfileToolbarHelper {
     public boolean isVideoCallItemVisible = false;
     public boolean isCallItemVisible = false;
     public boolean isMyProfile = false;
+    public boolean isMuteMode = false;
 
     private final ProfileActivityReferenceCallback referenceCallback;
 
@@ -98,12 +105,13 @@ public class ProfileToolbarHelper {
         this.referenceCallback = callback;
     }
 
-    public void checkVideoCallAndCallVisibility(TLRPC.UserFull userInfo, boolean myProfile) {
+    public void checkVideoCallAndCallVisibility(TLRPC.UserFull userInfo, boolean myProfile, boolean isMuteMode) {
         if (userInfo != null && userInfo.phone_calls_available) {
             isCallItemVisible = true;
             isVideoCallItemVisible = userInfo.video_calls_available;
         }
         isMyProfile = myProfile;
+        this.isMuteMode=isMuteMode;
     }
 
     public void setupGifts(){
@@ -299,7 +307,11 @@ public class ProfileToolbarHelper {
         masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
         items.add(ProfileToolbarButtonItem.Message);
-        items.add(ProfileToolbarButtonItem.UnMute);
+        if(isMuteMode){
+            items.add(ProfileToolbarButtonItem.UnMute);
+        } else {
+            items.add(ProfileToolbarButtonItem.Mute);
+        }
 
         if(otherItem.hasSubItem(leave_group)){
             items.add(ProfileToolbarButtonItem.Leave);

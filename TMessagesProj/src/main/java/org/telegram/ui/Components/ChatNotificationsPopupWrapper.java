@@ -296,7 +296,35 @@ public class ChatNotificationsPopupWrapper {
         y -= windowLayout.getMeasuredHeight() / 2f;
         popupWindow.showAtLocation(parentFragment.getFragmentView(), 0, (int) x, (int) y);
         popupWindow.dimBehind();
-        //  parentFragment.dimBehindView(true);
+    }
+
+    public void showAsNewProfileToolbarButton(BaseFragment parentFragment, View anchorView, float touchedX, float touchedY) {
+        if (parentFragment == null || parentFragment.getFragmentView() == null) {
+            return;
+        }
+        popupWindow = new ActionBarPopupWindow(windowLayout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
+        popupWindow.setPauseNotifications(true);
+        popupWindow.setDismissAnimationDuration(220);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setClippingEnabled(true);
+        popupWindow.setAnimationStyle(R.style.PopupContextAnimation);
+        popupWindow.setFocusable(true);
+        windowLayout.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST));
+        popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
+        popupWindow.getContentView().setFocusableInTouchMode(true);
+
+        float x = touchedX, y = touchedY;
+        View view = anchorView;
+        while (view != parentFragment.getFragmentView()) {
+            if (view.getParent() == null) {
+                return;
+            }
+            x += view.getX();
+            y += view.getY();
+            view = (View) view.getParent();
+        }
+        popupWindow.showAtLocation(parentFragment.getFragmentView(), 0, (int) x, (int) y);
+        popupWindow.dimBehind();
     }
 
     public interface Callback {
