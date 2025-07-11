@@ -443,6 +443,116 @@ public class ProfileToolbarHelper {
         return isPulledDown;
     }
 
+    public void handleFullExpandAnimationFromClickingOnAvatar(
+            float extraHeight,
+            float avatarAnimationProgress,
+            ScamDrawable scamDrawable,
+            ImageView timeItem,
+            ImageView starBgItem,
+            ImageView starFgItem,
+            Drawable lockIconDrawable,
+            int newTop,
+            MessagesController.PeerColor peerColor
+    ){
+        Log.e("SCROLL","handleFullExpandAnimationFromClickingOnAvatar");
+        if(referenceCallback == null) return;
+
+        final ActionBar actionBar = referenceCallback.getActionBar();
+        final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
+        final ProfileActivity.AvatarImageView avatarImage = referenceCallback.getAvatarImage();
+        final ProfileStoriesView storyView = referenceCallback.getStoryView();
+        final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
+        final ProfileAvatarContainer avatarContainer = referenceCallback.getAvatarContainer();
+        final CrossfadeDrawable[] verifiedCrossfadeDrawable = referenceCallback.getVerifiedCrossfadeDrawable();
+        final CrossfadeDrawable[] premiumCrossfadeDrawable = referenceCallback.getPremiumCrossfadeDrawable();
+
+//        needLayoutText(1f, extraHeight, 0);
+
+        float avY = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight() / 2.0f - 21 * AndroidUtilities.density + actionBar.getTranslationY();
+
+        nameTextView[0].setTranslationX(0);
+        nameTextView[0].setTranslationY((float) Math.floor(avY) + AndroidUtilities.dp(1.3f));
+        onlineTextView[0].setTranslationX(0);
+        onlineTextView[0].setTranslationY((float) Math.floor(avY) + AndroidUtilities.dp(24));
+        nameTextView[0].setScaleX(1.0f);
+        nameTextView[0].setScaleY(1.0f);
+
+        nameTextView[1].setScaleX(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
+        nameTextView[1].setScaleY(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
+
+
+        float startWidth = getTextCorrectWidth(nameTextView[1], 1f, true);
+        float endWidth = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
+        float startCenter = AndroidUtilities.displaySize.x / 2 - (dp(TOOLBAR_TEXT_INITIAL_START_MARGIN) + startWidth / 2);
+        float endCenter = AndroidUtilities.displaySize.x / 2 -(dp(16) + endWidth/2);
+        nameX = startCenter - endCenter;
+//        Log.e("TEXTISSUE2","startWidth="+startWidth+"   endWidth="+endWidth+"    dif="+dif+"    nameX="+nameX+"   x="+nameTextView[1].getX()+"  startCenter="+startCenter+"   endCenter="+endCenter);
+////        float textWidthFull = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
+////        float textWidthHalfExpand = getTextCorrectWidth(nameTextView[1], 1f, true);
+////        float extraSizeBecauseOfScaling = (endWidth - startWidth);
+////        nameX = dp(-48) + extraSizeBecauseOfScaling * 2;
+////        nameX = dp(16);
+        nameTextView[1].setTranslationX(nameX);
+//        nameTextView[1].setX(dp(16));
+        nameTextView[1].invalidate();
+
+
+        float avatarScale = (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
+        if (storyView != null) {
+            storyView.setExpandProgress(1f);
+        }
+        if (giftsView != null) {
+            giftsView.setExpandProgress(1f);
+        }
+
+        avatarContainer.setScaleX(avatarScale);
+        avatarContainer.setScaleY(avatarScale);
+        avatarContainer.setTranslationY(AndroidUtilities.lerp(avatarY, avatarY + MIN_PROFILE_IMAGE_CIRCLE_SIZE, avatarAnimationProgress));
+        avatarImage.setRoundRadius((int) AndroidUtilities.lerp(referenceCallback.requestGetSmallAvatarRoundRadius(), 0f, avatarAnimationProgress));
+
+
+//        avatarImage.setRoundRadius((int) AndroidUtilities.lerp(referenceCallback.requestGetSmallAvatarRoundRadius(), 0f, avatarAnimationProgress));
+//        avatarContainer.setTranslationY(AndroidUtilities.lerp((float) Math.ceil(avY), 0f, avatarAnimationProgress));
+        Log.e("avatarContainer>>","#2  y="+AndroidUtilities.lerp((float) Math.ceil(avY), 0f, avatarAnimationProgress));
+        float extra = (avatarContainer.getMeasuredWidth() - AndroidUtilities.dp(42)) * avatarScale;
+        timeItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(16) + extra);
+        timeItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(15) + extra);
+        starBgItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(28) + extra);
+        starBgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
+        starFgItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(28) + extra);
+        starFgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
+//        avatarContainer.setScaleX(avatarScale);
+//        avatarContainer.setScaleY(avatarScale);
+
+        overlaysView.setAlphaValue(avatarAnimationProgress, false);
+        actionBar.setItemsColor(ColorUtils.blendARGB(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_actionBarDefaultIcon), Color.WHITE, avatarAnimationProgress), false);
+
+        if (scamDrawable != null) {
+            scamDrawable.setColor(ColorUtils.blendARGB(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), Color.argb(179, 255, 255, 255), avatarAnimationProgress));
+        }
+        if (lockIconDrawable != null) {
+            lockIconDrawable.setColorFilter(ColorUtils.blendARGB(getThemedColor(Theme.key_chat_lockIcon), Color.WHITE, avatarAnimationProgress), PorterDuff.Mode.MULTIPLY);
+        }
+        if (verifiedCrossfadeDrawable[1] != null) {
+            verifiedCrossfadeDrawable[1].setProgress(avatarAnimationProgress);
+            nameTextView[1].invalidate();
+        }
+        if (premiumCrossfadeDrawable[1] != null) {
+            premiumCrossfadeDrawable[1].setProgress(avatarAnimationProgress);
+            nameTextView[1].invalidate();
+        }
+
+        referenceCallback.requestUpdateEmojiStatusDrawableColor(avatarAnimationProgress);
+
+        final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) avatarContainer.getLayoutParams();
+        params.width = params.height = (int) AndroidUtilities.lerp(MIN_PROFILE_IMAGE_CIRCLE_SIZE, (extraHeight + newTop) / avatarScale, avatarAnimationProgress);
+        avatarContainer.requestLayout();
+
+        if (toolbarLayoutUpdateCallback != null) {
+            toolbarLayoutUpdateCallback.onAvatarScaleUpdate(avatarScale, avatarY);
+        }
+    }
+
     public Boolean startAutoCollapse(
             ActionBarMenuItem otherItem,
             ActionBarMenuItem searchItem,
