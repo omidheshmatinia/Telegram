@@ -257,7 +257,7 @@ public class ProfileToolbarHelper {
         public ViewPagerBlurredBottom(Context context, View behindView, View parentView, Theme.ResourcesProvider resourcesProvider) {
             super(context);
             drawable = new BlurBehindDrawable(behindView, parentView, 1, resourcesProvider);
-            drawable.setAnimateAlpha(true);
+            drawable.setAnimateAlpha(false);
             drawable.show(true);
         }
 
@@ -424,7 +424,7 @@ public class ProfileToolbarHelper {
                 nameTextView[1].setTranslationY(nameY);
                 onlineTextView[1].setTranslationX(onlineX);
                 onlineTextView[1].setTranslationY(onlineY);
-
+                nameTextView[1].requestLayout();
                 if (mediaCounterTextView != null) {
                     mediaCounterTextView.setTranslationX(onlineX);
                     mediaCounterTextView.setTranslationY(onlineTextView[1].getTranslationY());
@@ -495,8 +495,6 @@ public class ProfileToolbarHelper {
         final CrossfadeDrawable[] verifiedCrossfadeDrawable = referenceCallback.getVerifiedCrossfadeDrawable();
         final CrossfadeDrawable[] premiumCrossfadeDrawable = referenceCallback.getPremiumCrossfadeDrawable();
 
-//        needLayoutText(1f, extraHeight, 0);
-
         float avY = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight() / 2.0f - 21 * AndroidUtilities.density + actionBar.getTranslationY();
 
         nameTextView[0].setTranslationX(0);
@@ -506,17 +504,17 @@ public class ProfileToolbarHelper {
         nameTextView[0].setScaleX(1.0f);
         nameTextView[0].setScaleY(1.0f);
 
-        nameTextView[1].setScaleX(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
-        nameTextView[1].setScaleY(ProfileToolbarHelper.NAME_SCALE_FULL_EXPANSION);
-
+        nameTextView[1].setScaleX(1f);
+        nameTextView[1].setScaleY(1f);
+        nameTextView[1].requestLayout();
 
         float startWidth = getTextCorrectWidth(nameTextView[1], 1f, true);
-        float endWidth = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
+        float endWidth = getTextCorrectWidth(nameTextView[1], 1f, true);
         float startCenter = AndroidUtilities.displaySize.x / 2 - (dp(TOOLBAR_TEXT_INITIAL_START_MARGIN) + startWidth / 2);
         float endCenter = AndroidUtilities.displaySize.x / 2 - (dp(16) + endWidth / 2);
         nameX = startCenter - endCenter;
         nameTextView[1].setTranslationX(nameX);
-        nameTextView[1].invalidate();
+        nameTextView[1].requestLayout();
 
 
         float avatarScale = (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
@@ -732,6 +730,17 @@ public class ProfileToolbarHelper {
             viewPagerBlurredBottom.setAlpha(valueAnimator.getAnimatedFraction());
             viewPagerBlurredBottom.update();
         });
+        blueAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                viewPagerBlurredBottom.drawable.setAnimateAlpha(true);
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                viewPagerBlurredBottom.drawable.setAnimateAlpha(false);
+            }
+        });
         return blueAnimator;
     }
     /**
@@ -856,9 +865,11 @@ public class ProfileToolbarHelper {
 
         needLayoutText(Math.min(1f, extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD), extraHeight, mediaHeaderAnimationProgress);
         float textWidthFull = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
-        float textWidthHalfExpand = getTextCorrectWidth(nameTextView[1], 1f, true);
-        float extraSizeBecauseOfScaling = (textWidthFull - textWidthHalfExpand) / 2;
-        nameX = AndroidUtilities.lerp(getTextCenterX(nameTextView[1], true), dp(-48) + extraSizeBecauseOfScaling * 2, value);
+        float textWidthStart = getTextCorrectWidth(nameTextView[1], 1f, true);
+        float textCenterStart = (dp(TOOLBAR_TEXT_INITIAL_START_MARGIN)+ textWidthStart/2);
+        float textCenterEnd = (dp(16) + textWidthFull/2);
+        float extraSizeBecauseOfScaling = textCenterStart - textCenterEnd;
+        nameX = AndroidUtilities.lerp(getTextCenterX(nameTextView[1], true), -extraSizeBecauseOfScaling, value);
         nameY = AndroidUtilities.lerp(getNameYForPhase2And3(extraHeight), getNameYForPhase2And3(extraHeight), value);
         onlineX = AndroidUtilities.lerp(getTextCenterX(onlineTextView[1], false), dp(-48), value);
         onlineY = nameY + GAP_BETWEEN_NAME_AND_ONLINE_TEXT;
