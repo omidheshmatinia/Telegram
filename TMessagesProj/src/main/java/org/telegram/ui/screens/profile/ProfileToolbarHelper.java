@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -563,6 +564,11 @@ public class ProfileToolbarHelper {
         params.width = params.height = (int) AndroidUtilities.lerp(MIN_PROFILE_IMAGE_CIRCLE_SIZE, (extraHeight + newTop) / avatarScale, avatarAnimationProgress);
         avatarContainer.requestLayout();
 
+
+        ValueAnimator blueAnimator = setupBlurAnimator();
+        if(avatarAnimationProgress == 1f) {
+            blueAnimator.start();
+        }
         if (toolbarLayoutUpdateCallback != null) {
             toolbarLayoutUpdateCallback.onAvatarScaleUpdate(avatarScale, avatarY);
         }
@@ -691,6 +697,7 @@ public class ProfileToolbarHelper {
         } else {
             expandAnimator.setInterpolator(CubicBezierInterpolator.EASE_BOTH);
         }
+        ValueAnimator blueAnimator = setupBlurAnimator();
         expandAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -709,14 +716,24 @@ public class ProfileToolbarHelper {
                 topView.setBackgroundColor(Color.BLACK);
                 avatarContainer.setVisibility(View.GONE);
                 avatarsViewPager.setVisibility(View.VISIBLE);
-                viewPagerBlurredBottom.setAlpha(1f);
-                viewPagerBlurredBottom.update();
+                blueAnimator.start();
             }
         });
+
         expandAnimator.start();
         return true;
     }
 
+    private ValueAnimator setupBlurAnimator(){
+        ValueAnimator blueAnimator = new ValueAnimator().setDuration(300);
+        blueAnimator.setFloatValues(0f, 1f);
+        blueAnimator.setStartDelay(30);
+        blueAnimator.addUpdateListener(valueAnimator -> {
+            viewPagerBlurredBottom.setAlpha(valueAnimator.getAnimatedFraction());
+            viewPagerBlurredBottom.update();
+        });
+        return blueAnimator;
+    }
     /**
      * Use it to auto scroll list to snapping points and update extra height
      *
