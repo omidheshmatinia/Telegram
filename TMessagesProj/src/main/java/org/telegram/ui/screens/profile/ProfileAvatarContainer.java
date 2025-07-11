@@ -36,7 +36,7 @@ public class ProfileAvatarContainer extends FrameLayout {
         addView(avatarImage, lp);
         this.curvedAnimationLayout = new CurvedAnimationLayout(getContext(), this);
         blurredView = new AvatarCircularBlurForeground(context, avatarImage, resourceProvider);
-
+        blurredView.setAlpha(0f);
         addView(blurredView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         addView(blackForegroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
     }

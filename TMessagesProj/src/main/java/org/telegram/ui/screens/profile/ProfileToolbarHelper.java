@@ -113,7 +113,8 @@ public class ProfileToolbarHelper {
             ImageView starFgItem,
             float progress,
             ValueAnimator expandAnimator,
-            float toolbarHeight
+            float toolbarHeight,
+            boolean isFirstAutoExpandAfterClickOnToolbar
     ) {
         final float textFirstMoveThreshHold = 0.4f; // first we need to wait buttons scale then texts start moving
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
@@ -142,7 +143,7 @@ public class ProfileToolbarHelper {
             giftsView.setExpandCoords(toolbarHeight);
             giftsView.setExpandProgress(normalized);
         }
-        if (avatarContainer != null) {
+        if (avatarContainer != null && !isFirstAutoExpandAfterClickOnToolbar) {
             avatarContainer.updateProgress(progress);
         }
         if (viewPagerBlurredBottom != null) {

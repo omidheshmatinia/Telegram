@@ -6966,7 +6966,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
                 updateCollectibleHint();
             } else if (extraHeight <= ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD) {
-                profileToolbarHelper.handleExpansionInFirstStage(timeItem, starBgItem, starFgItem, diff, expandAnimator, extraHeight);
+                profileToolbarHelper.handleExpansionInFirstStage(timeItem, starBgItem, starFgItem, diff, expandAnimator, extraHeight, avatarAnimationProgress != 1f);
                 updateCollectibleHint();
             }
 
