@@ -32,7 +32,6 @@ import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -49,6 +48,7 @@ import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RadialProgress;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,7 +102,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
     private class StoryCircle {
         public StoryCircle(TL_stories.StoryItem storyItem) {
             this.storyId = storyItem.id;
-            this.imageReceiver.setRoundRadius(dp(200));
+            this.imageReceiver.setRoundRadius(dp(ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE));
             this.imageReceiver.setParentView(ProfileStoriesView.this);
             if (attached) {
                 this.imageReceiver.onAttachedToWindow();
@@ -485,15 +485,9 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        float rright = rightAnimated.set(this.right);
         float avatarPullProgress = Utilities.clamp((avatarContainer.getScaleX() - 1f) / 0.4f, 1f, 0f);
-        float insetMain = AndroidUtilities.lerp(AndroidUtilities.dpf2(4f), AndroidUtilities.dpf2(3.5f), avatarPullProgress);
-        insetMain *= progressToInsets;
-        float ax = avatarContainer.getX() + insetMain * avatarContainer.getScaleX();
-        float ay = avatarContainer.getY() + insetMain * avatarContainer.getScaleY();
-        float aw = (avatarContainer.getWidth() - insetMain * 2) * avatarContainer.getScaleX();
-        float ah = (avatarContainer.getHeight() - insetMain * 2) * avatarContainer.getScaleY();
-        rect1.set(ax, ay, ax + aw, ay + ah);
+
+        rect1.set(0, 0, avatarImage.getWidth() * avatarImage.getScaleX(), avatarImage.getWidth() * avatarImage.getScaleX());
 
         float maxX = this.left;
         boolean needsSort = false;
@@ -589,7 +583,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
 
             if (isFailed) {
                 rect2.set(rect1);
-                rect2.inset(-dpf2(2.66f + 2.23f / 2), -dpf2(2.66f + 2.23f / 2));
+                rect2.inset(dpf2(1f), dpf2(1f));
                 final Paint paint = StoriesUtilities.getErrorPaint(rect2);
                 paint.setStrokeWidth(AndroidUtilities.dp(2));
                 paint.setAlpha((int) (255 * segmentsAlpha));
@@ -602,9 +596,9 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
                 }
             } else if ((mainCircle != null || uploadingStoriesCount > 0) && segmentsAlpha > 0) {
                 rect2.set(rect1);
-                rect2.inset(-dpf2(2.66f + 2.23f / 2), -dpf2(2.66f + 2.23f / 2));
+                rect2.inset(dpf2(1f), dpf2(1f));
                 rect3.set(rect1);
-                rect3.inset(-dpf2(2.66f + 1.5f / 2), -dpf2(2.66f + 1.5f / 2));
+                rect3.inset(dpf2(1f), dpf2(1f));
                 AndroidUtilities.lerp(rect2, rect3, avatarPullProgress, rect3);
 
                 float separatorAngle = lerp(0, (float) (dpf2(2 + 2.23f) / (rect1.width() * Math.PI) * 360f), clamp(segmentsCount - 1, 1, 0) * segmentsAlpha);
@@ -650,7 +644,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
                     if (read > 0) {
                         readPaint.setAlpha((int) (readPaintAlpha * read * segmentsAlpha));
                         readPaint.setStrokeWidth(dpf2(1.5f));
-                        drawArc(canvas, rect3, a, -widthAngle * appear, false, readPaint);
+                        drawArc(canvas, rect3, a, -widthAngle * appear, true, readPaint);
                     }
 
                     if (bounceScale != 1) {
@@ -970,12 +964,12 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
 
     public void setBounds(float left, float right, float cy, boolean animated) {
         boolean changed = Math.abs(left - this.left) > 0.1f || Math.abs(right - this.right) > 0.1f || Math.abs(cy - this.cy) > 0.1f;
-        this.left = left;
-        this.right = right;
+        this.left = 0;
+        this.right = avatarImage.getMeasuredWidth();
         if (!animated) {
             this.rightAnimated.set(this.right, true);
         }
-        this.cy = cy;
+        this.cy = avatarImage.getMeasuredWidth() / 2;
         if (changed) {
             invalidate();
         }

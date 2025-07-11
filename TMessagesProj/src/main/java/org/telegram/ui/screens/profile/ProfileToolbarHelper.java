@@ -729,6 +729,7 @@ public class ProfileToolbarHelper {
         expandAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                storyView.setVisibility(View.GONE);
                 isThirdPhaseRunning = true;
                 setAvatarForegroundImage(false);
                 avatarsViewPager.setAnimatedFileMaybe(avatarImage.getImageReceiver().getAnimation());
