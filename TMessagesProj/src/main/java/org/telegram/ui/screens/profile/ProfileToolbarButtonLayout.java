@@ -41,7 +41,7 @@ public class ProfileToolbarButtonLayout extends BlurredFrameLayout {
         super(context, sizeNotifierFrameLayout);
         setClipChildren(false);
         setClipToPadding(false);
-        backgroundPaint.setColor(0x50ffffff);
+        backgroundPaint.setColor(0x50aaaaaa);
         this.buttonInfo = item;
 
         View infoLayout = createLayout();
