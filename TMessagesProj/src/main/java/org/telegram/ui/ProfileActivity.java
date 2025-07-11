@@ -1081,9 +1081,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             this.progressToInsets = progressToInsets;
-            //if (hasStories) {
-                invalidate();
-            //}
+            invalidate();
         }
 
         public void drawForeground(boolean drawForeground) {
@@ -4803,7 +4801,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         if (avatarsViewPager != null) {
             avatarsViewPager.onDestroy();
         }
-        Log.e("OMID","actionBar.getOccupyStatusBar() ="+actionBar.getOccupyStatusBar()+"   inBubbleMode="+inBubbleMode);
         overlaysView = new ProfileOverlaysView(
                 context,
                 actionBar.getOccupyStatusBar() && !inBubbleMode ? AndroidUtilities.statusBarHeight : 0,
@@ -7083,7 +7080,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void needLayout(boolean animated) {
-        Log.e("OMDFunction","needLayout");
         final int newTop = (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0) + ActionBar.getCurrentActionBarHeight();
 
         FrameLayout.LayoutParams layoutParams;
@@ -7641,7 +7637,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         invalidateIsInLandscapeMode();
         if (listAdapter != null) {
-            // saveScrollPosition();
             firstLayout = true;
             listAdapter.notifyDataSetChanged();
         }
@@ -13609,21 +13604,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else {
                 domain = "http://maps.google.com/maps";
             }
-//                    if (myLocation != null) {
-//                        try {
-//                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Locale.US, domain + "?saddr=%f,%f&daddr=%f,%f", myLocation.getLatitude(), myLocation.getLongitude(), daddrLat, daddrLong)));
-//                            getParentActivity().startActivity(intent);
-//                        } catch (Exception e) {
-//                            FileLog.e(e);
-//                        }
-//                    } else {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Locale.US, domain + "?q=" + userInfo.business_location.address )));
                 getParentActivity().startActivity(intent);
             } catch (Exception e) {
                 FileLog.e(e);
             }
-//                    }
         }
 
     }

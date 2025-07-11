@@ -112,19 +112,19 @@ public class ProfileToolbarHelper {
             isVideoCallItemVisible = userInfo.video_calls_available;
         }
         isMyProfile = myProfile;
-        this.isMuteMode=isMuteMode;
+        this.isMuteMode = isMuteMode;
     }
 
-    public void setupGifts(){
+    public void setupGifts() {
         int screenWidth = AndroidUtilities.displaySize.x;
         boolean isLandscape = AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y;
         Rect avatarRect;
-        if(isLandscape || AndroidUtilities.isTablet()){
+        if (isLandscape || AndroidUtilities.isTablet()) {
             float maxWidth = dp(420);
-            float x= (AndroidUtilities.displaySize.x - maxWidth)/2;
-            avatarRect = new Rect(x, 0, maxWidth , getNameEndYForPhase1());
+            float x = (AndroidUtilities.displaySize.x - maxWidth) / 2;
+            avatarRect = new Rect(x, 0, maxWidth, getNameEndYForPhase1());
         } else {
-            avatarRect = new Rect(0, 0, screenWidth , getNameEndYForPhase1());
+            avatarRect = new Rect(0, 0, screenWidth, getNameEndYForPhase1());
         }
         referenceCallback.getGiftsView().update();
         referenceCallback.getGiftsView().setGiftsViewBounds(avatarRect, screenWidth / 2, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2 + AndroidUtilities.statusBarHeight, MAX_PROFILE_IMAGE_CIRCLE_SIZE / 2);
@@ -210,7 +210,7 @@ public class ProfileToolbarHelper {
             if (nameTextView[a] == null || onlineTextView[a] == null) {
                 continue;
             }
-            if(diff == 1f){
+            if (diff == 1f) {
                 needLayoutText(diff, FIRST_EXPANSION_HEIGHT_THRESH_HOLD, 0);
             }
             nameTextView[a].setScaleX(nameScale);
@@ -261,6 +261,7 @@ public class ProfileToolbarHelper {
     public class ViewPagerBlurredBottom extends View {
 
         public final BlurBehindDrawable drawable;
+
         public ViewPagerBlurredBottom(Context context, View behindView, View parentView, Theme.ResourcesProvider resourcesProvider) {
             super(context);
             drawable = new BlurBehindDrawable(behindView, parentView, 1, resourcesProvider);
@@ -272,7 +273,7 @@ public class ProfileToolbarHelper {
         @Override
         public void setTranslationY(float translationY) {
             super.setTranslationY(translationY);
-            drawable.onPanTranslationUpdate(- translationY);
+            drawable.onPanTranslationUpdate(-translationY);
         }
 
         @Override
@@ -297,6 +298,7 @@ public class ProfileToolbarHelper {
     }
 
     private ViewPagerBlurredBottom viewPagerBlurredBottom;
+
     public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView, ActionBarMenuItem otherItem, ProfileToolbarButtonsRowLayout.ToolbarButtonClickCallback clickListener) {
 
         viewPagerBlurredBottom = new ViewPagerBlurredBottom(context, referenceCallback.getAvatarsViewPager(), masterView, resourcesProvider);
@@ -307,33 +309,33 @@ public class ProfileToolbarHelper {
         toolbarButtonsLayout = new ProfileToolbarButtonsRowLayout(context, masterView, resourcesProvider, clickListener);
         masterView.addView(toolbarButtonsLayout, new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, ProfileToolbarButtonsRowLayout.FULL_HEIGHT));
         ArrayList<ProfileToolbarButtonItem> items = new ArrayList<>();
-        if(isMsgVisible){
+        if (isMsgVisible) {
             items.add(ProfileToolbarButtonItem.Message);
         }
-        if(otherItem.hasSubItem(view_discussion)){
+        if (otherItem.hasSubItem(view_discussion)) {
             items.add(ProfileToolbarButtonItem.Discuss);
         }
-        if(isMuteMode){
+        if (isMuteMode) {
             items.add(ProfileToolbarButtonItem.UnMute);
         } else {
             items.add(ProfileToolbarButtonItem.Mute);
         }
-        if(otherItem.hasSubItem(gift_premium)){
+        if (otherItem.hasSubItem(gift_premium)) {
             items.add(ProfileToolbarButtonItem.Gift);
         }
-        if(isCallItemVisible) {
+        if (isCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Call);
         }
-        if(isVideoCallItemVisible) {
+        if (isVideoCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Video);
         }
-        if(otherItem.hasSubItem(leave_group)){
+        if (otherItem.hasSubItem(leave_group)) {
             items.add(ProfileToolbarButtonItem.Leave);
         }
-        if(isMyProfile) {
+        if (isMyProfile) {
             items.add(ProfileToolbarButtonItem.AddStory);
         }
-        if(otherItem.hasSubItem(report)){
+        if (otherItem.hasSubItem(report)) {
             items.add(ProfileToolbarButtonItem.Report);
         }
         toolbarButtonsLayout.setItems(items);
@@ -349,11 +351,11 @@ public class ProfileToolbarHelper {
         return _nameStartingY;
     }
 
-    private float getNameEndYForPhase1(){
+    private float getNameEndYForPhase1() {
         return FIRST_EXPANSION_HEIGHT_THRESH_HOLD - ProfileToolbarButtonsRowLayout.FULL_HEIGHT + MIN_PROFILE_IMAGE_CIRCLE_SIZE;
     }
 
-    private float getNameYForPhase2And3(float extraHeight){
+    private float getNameYForPhase2And3(float extraHeight) {
         return extraHeight - ProfileToolbarButtonsRowLayout.FULL_HEIGHT + MIN_PROFILE_IMAGE_CIRCLE_SIZE;
     }
 
@@ -363,15 +365,16 @@ public class ProfileToolbarHelper {
 
     /**
      * calculate the Center TranslationX for textviews.
+     *
      * @param textView
      * @param isNameTextView
      * @return
      */
     private float getTextCenterX(SimpleTextView textView, boolean isNameTextView) {
         float startWidth = getTextCorrectWidth(textView, 1f, isNameTextView);
-        float startCenter = startWidth/ 2 + dp(TOOLBAR_TEXT_INITIAL_START_MARGIN);
+        float startCenter = startWidth / 2 + dp(TOOLBAR_TEXT_INITIAL_START_MARGIN);
         float centerScreen = AndroidUtilities.displaySize.x / 2;
-        return centerScreen-startCenter;
+        return centerScreen - startCenter;
     }
 
     public boolean handleExpansionInSecondStage(
@@ -397,7 +400,6 @@ public class ProfileToolbarHelper {
             float[] expandAnimatorValues,
             float extraHeight
     ) {
-        Log.e("SCROLL","222nd");
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
         final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
         float startingAvatarScale = (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
@@ -416,30 +418,23 @@ public class ProfileToolbarHelper {
         final RecyclerListView listView = referenceCallback.getListView();
         float threshHOld = isPulledDown ? THRESH_HOLD_FOR_AUTO_COLLAPSE : THRESH_HOLD_FOR_AUTO_EXPAND;
         if (allowPullingDown && (openingAvatar || expandProgress >= threshHOld)) {
-             if (!expandAnimator.isRunning()) {
+            if (!expandAnimator.isRunning()) {
                 if (!isPulledDown) {
                     isPulledDown = startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, isChatNoForward);
                 }
             }
-            Log.e("SCROLL","2222 >   1");
             ViewGroup.LayoutParams params = avatarsViewPager.getLayoutParams();
             params.width = listView.getMeasuredWidth();
             params.height = (int) (h + newTop);
             avatarsViewPager.requestLayout();
             if (!expandAnimator.isRunning()) {
-                float additionalTranslationY = 0; //todo extra can be removed
-                if (openAnimationInProgress && playProfileAnimation == 2) {
-                    additionalTranslationY = -(1.0f - avatarAnimationProgress) * AndroidUtilities.dp(50);
-                }
                 nameY = getNameYForPhase2And3(extraHeight);
-                onlineY = nameY+GAP_BETWEEN_NAME_AND_ONLINE_TEXT;
+                onlineY = nameY + GAP_BETWEEN_NAME_AND_ONLINE_TEXT;
                 nameTextView[1].setTranslationX(nameX);
                 nameTextView[1].setTranslationY(nameY);
                 onlineTextView[1].setTranslationX(onlineX);
                 onlineTextView[1].setTranslationY(onlineY);
-                //todo set height
-//                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)avatarContainer.getLayoutParams();
-//                lp.height = (int)extraHeight;
+
                 if (mediaCounterTextView != null) {
                     mediaCounterTextView.setTranslationX(onlineX);
                     mediaCounterTextView.setTranslationY(onlineTextView[1].getTranslationY());
@@ -452,15 +447,12 @@ public class ProfileToolbarHelper {
             }
         } else {
             if (isPulledDown) {
-                isPulledDown= startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
+                isPulledDown = startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
             }
-            Log.e("SCROLL","2222 >   2");
-
             avatarContainer.setScaleX(avatarScale);
             avatarContainer.setScaleY(avatarScale);
 
             if (expandAnimator == null || !expandAnimator.isRunning()) {
-                Log.e("SCROLL","2222 >   3");
                 float avatarSizeDifferenceComparedToFirstState = (avatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE) - startingAvatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE;
                 avatarY = getAvatarYAfterFirstExpansion() + avatarSizeDifferenceComparedToFirstState;
                 avatarContainer.setTranslationY(avatarY);
@@ -501,9 +493,8 @@ public class ProfileToolbarHelper {
             Drawable lockIconDrawable,
             int newTop,
             MessagesController.PeerColor peerColor
-    ){
-        Log.e("SCROLL","handleFullExpandAnimationFromClickingOnAvatar");
-        if(referenceCallback == null) return;
+    ) {
+        if (referenceCallback == null) return;
 
         final ActionBar actionBar = referenceCallback.getActionBar();
         final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
@@ -532,16 +523,9 @@ public class ProfileToolbarHelper {
         float startWidth = getTextCorrectWidth(nameTextView[1], 1f, true);
         float endWidth = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
         float startCenter = AndroidUtilities.displaySize.x / 2 - (dp(TOOLBAR_TEXT_INITIAL_START_MARGIN) + startWidth / 2);
-        float endCenter = AndroidUtilities.displaySize.x / 2 -(dp(16) + endWidth/2);
+        float endCenter = AndroidUtilities.displaySize.x / 2 - (dp(16) + endWidth / 2);
         nameX = startCenter - endCenter;
-//        Log.e("TEXTISSUE2","startWidth="+startWidth+"   endWidth="+endWidth+"    dif="+dif+"    nameX="+nameX+"   x="+nameTextView[1].getX()+"  startCenter="+startCenter+"   endCenter="+endCenter);
-////        float textWidthFull = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
-////        float textWidthHalfExpand = getTextCorrectWidth(nameTextView[1], 1f, true);
-////        float extraSizeBecauseOfScaling = (endWidth - startWidth);
-////        nameX = dp(-48) + extraSizeBecauseOfScaling * 2;
-////        nameX = dp(16);
         nameTextView[1].setTranslationX(nameX);
-//        nameTextView[1].setX(dp(16));
         nameTextView[1].invalidate();
 
 
@@ -558,10 +542,6 @@ public class ProfileToolbarHelper {
         avatarContainer.setTranslationY(AndroidUtilities.lerp(avatarY, avatarY + MIN_PROFILE_IMAGE_CIRCLE_SIZE, avatarAnimationProgress));
         avatarImage.setRoundRadius((int) AndroidUtilities.lerp(referenceCallback.requestGetSmallAvatarRoundRadius(), 0f, avatarAnimationProgress));
 
-
-//        avatarImage.setRoundRadius((int) AndroidUtilities.lerp(referenceCallback.requestGetSmallAvatarRoundRadius(), 0f, avatarAnimationProgress));
-//        avatarContainer.setTranslationY(AndroidUtilities.lerp((float) Math.ceil(avY), 0f, avatarAnimationProgress));
-        Log.e("avatarContainer>>","#2  y="+AndroidUtilities.lerp((float) Math.ceil(avY), 0f, avatarAnimationProgress));
         float extra = (avatarContainer.getMeasuredWidth() - AndroidUtilities.dp(42)) * avatarScale;
         timeItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(16) + extra);
         timeItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(15) + extra);
@@ -569,8 +549,6 @@ public class ProfileToolbarHelper {
         starBgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
         starFgItem.setTranslationX(avatarContainer.getX() + AndroidUtilities.dp(28) + extra);
         starFgItem.setTranslationY(avatarContainer.getY() + AndroidUtilities.dp(24) + extra);
-//        avatarContainer.setScaleX(avatarScale);
-//        avatarContainer.setScaleY(avatarScale);
 
         overlaysView.setAlphaValue(avatarAnimationProgress, false);
         actionBar.setItemsColor(ColorUtils.blendARGB(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_actionBarDefaultIcon), Color.WHITE, avatarAnimationProgress), false);
@@ -612,7 +590,6 @@ public class ProfileToolbarHelper {
             boolean isInLandscapeMode,
             boolean doNotSetForeground
     ) {
-        Log.e("EXPAND","startAutoCollapse");
         final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileGalleryView avatarsViewPager = referenceCallback.getAvatarsViewPager();
@@ -684,8 +661,7 @@ public class ProfileToolbarHelper {
             float[] expandAnimatorValues,
             ImageUpdater imageUpdater,
             boolean isChatNoForward
-            ) {
-        Log.e("EXPAND","startAutoExpand");
+    ) {
         final ProfileOverlaysView overlaysView = referenceCallback.getOverlaysView();
         final FrameLayout avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileGalleryView avatarsViewPager = referenceCallback.getAvatarsViewPager();
@@ -754,13 +730,14 @@ public class ProfileToolbarHelper {
 
     /**
      * Use it to auto scroll list to snapping points and update extra height
+     *
      * @param lm
      * @param isFullyExpanded
      */
-    public void autoScrollListForAutoExpandingPhase(LinearLayoutManager lm, boolean isFullyExpanded){
+    public void autoScrollListForAutoExpandingPhase(LinearLayoutManager lm, boolean isFullyExpanded) {
         final View view = lm.findViewByPosition(0);
         final RecyclerListView listView = referenceCallback.getListView();
-        if(view != null){
+        if (view != null) {
             BotWebViewVibrationEffect.IMPACT_RIGID.vibrate();
             if (isFullyExpanded) {
                 listView.smoothScrollBy(0, getFullExpandSnappingPointForListView(lm), CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -770,10 +747,10 @@ public class ProfileToolbarHelper {
         }
     }
 
-    public int getFullExpandSnappingPointForListView(LinearLayoutManager lm){
+    public int getFullExpandSnappingPointForListView(LinearLayoutManager lm) {
         final View view = lm.findViewByPosition(0);
         final RecyclerListView listView = referenceCallback.getListView();
-        if(view != null) {
+        if (view != null) {
             final ActionBar actionBar = referenceCallback.getActionBar();
             final int actionBarHeight = ActionBar.getCurrentActionBarHeight() + (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0);
             return view.getTop() - listView.getMeasuredWidth() + actionBarHeight;
@@ -783,6 +760,7 @@ public class ProfileToolbarHelper {
     }
 
     public boolean isThirdPhaseRunning = false;
+
     public void handleAutoExpandInThirdPhase(
             float value,
             float extraHeight,
@@ -796,16 +774,13 @@ public class ProfileToolbarHelper {
             ScamDrawable scamDrawable,
             Drawable lockIconDrawable
     ) {
-        Log.e("SCROLL","3RD");
         isThirdPhaseRunning = true;
-        if(extraHeight < FIRST_EXPANSION_HEIGHT_THRESH_HOLD && expandAnimator.isRunning()){
+        if (extraHeight < FIRST_EXPANSION_HEIGHT_THRESH_HOLD && expandAnimator.isRunning()) {
             expandAnimator.cancel();
             return;
         }
         final View avatarContainer = referenceCallback.getAvatarContainer();
         final ProfileStoriesView storyView = referenceCallback.getStoryView();
-        final ProfileGiftsView giftsView = referenceCallback.getGiftsView();
-        final ProfileAvatarContainer avatarsContainer = referenceCallback.getAvatarContainer();
         final ActionBar actionBar = referenceCallback.getActionBar();
         final RecyclerListView listView = referenceCallback.getListView();
         final ProfileActivity.AvatarImageView avatarImage = referenceCallback.getAvatarImage();
@@ -823,25 +798,11 @@ public class ProfileToolbarHelper {
         if (storyView != null) {
             storyView.setExpandProgress(value);
         }
-
-//        if(avatarsContainer != null){
-//            avatarsContainer.updateThirdStageAnimationProgress(expandProgress);
-//        }
-
         if (searchItem != null) {
             searchItem.setAlpha(1.0f - value);
             searchItem.setScaleY(1.0f - value);
             searchItem.setVisibility(View.VISIBLE);
             searchItem.setClickable(searchItem.getAlpha() > .5f);
-        }
-
-        if (extraHeight > ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD && expandProgress < THRESH_HOLD_FOR_AUTO_EXPAND) {
-//            float startingAvatarScale = (float) MAX_PROFILE_IMAGE_CIRCLE_SIZE / MIN_PROFILE_IMAGE_CIRCLE_SIZE;
-//            float avatarSizeDifferenceComparedToFirstState = (avatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE) - startingAvatarScale * MIN_PROFILE_IMAGE_CIRCLE_SIZE;
-//            nameY = getNameYAfterFirstExpansion() + avatarSizeDifferenceComparedToFirstState;
-//            nameX = getTextCenterX(nameTextView[1]);
-//            onlineX = getTextCenterX(onlineTextView[1]);
-//            onlineY = nameY + GEP_BETWEEN_NAME_AND_ONLINE_TEXT;
         }
 
         if (scamDrawable != null) {
@@ -888,10 +849,9 @@ public class ProfileToolbarHelper {
         }
 
         needLayoutText(Math.min(1f, extraHeight / ProfileToolbarHelper.FIRST_EXPANSION_HEIGHT_THRESH_HOLD), extraHeight, mediaHeaderAnimationProgress);
-        //todo check here about scale
         float textWidthFull = getTextCorrectWidth(nameTextView[1], NAME_SCALE_FULL_EXPANSION, true);
         float textWidthHalfExpand = getTextCorrectWidth(nameTextView[1], 1f, true);
-        float extraSizeBecauseOfScaling = (textWidthFull - textWidthHalfExpand)/2;
+        float extraSizeBecauseOfScaling = (textWidthFull - textWidthHalfExpand) / 2;
         nameX = AndroidUtilities.lerp(getTextCenterX(nameTextView[1], true), dp(-48) + extraSizeBecauseOfScaling * 2, value);
         nameY = AndroidUtilities.lerp(getNameYForPhase2And3(extraHeight), getNameYForPhase2And3(extraHeight), value);
         onlineX = AndroidUtilities.lerp(getTextCenterX(onlineTextView[1], false), dp(-48), value);
@@ -933,15 +893,15 @@ public class ProfileToolbarHelper {
 
     /**
      * Used to return the correct width ( text, icons at sides )
+     *
      * @param textView
      * @return
      */
-    public static float getTextCorrectWidth(SimpleTextView textView, float scale, boolean isNameText){
-        if(scale == 0f){
+    public static float getTextCorrectWidth(SimpleTextView textView, float scale, boolean isNameText) {
+        if (scale == 0f) {
             scale = textView.getScaleX();
         }
-        Log.e("TextIssue","getTextCorrectWidth  scale="+scale+"  widthbeforeScale"+textView.getPaint().measureText(textView.getText().toString())+"    widthWithScale="+textView.getPaint().measureText(textView.getText().toString()) * scale+"        sideDrawbaleSize = "+textView.getSideDrawablesSize());
-        if(isNameText){
+        if (isNameText) {
             return textView.getPaint().measureText(textView.getText().toString()) * scale + textView.getSideDrawablesSize();
         } else {
             return textView.getPaint().measureText(textView.getText().toString()) * scale + textView.getRightDrawableWidth();
@@ -961,24 +921,13 @@ public class ProfileToolbarHelper {
         }
 
         int viewWidth = AndroidUtilities.isTablet() ? dp(490) : AndroidUtilities.displaySize.x;
-        ActionBarMenuItem item = avatarsViewPagerIndicatorView.getSecondaryMenuItem();
-        int extra = 0;
-//        if (editItemVisible) { //todo can be removed later
-//            extra += 48;
-//        }
-//        if (searchItem != null) {
-//            extra += 48;
-//        }
-        if(diff == 1f){
-//            Log.e("TextIssue","needLayoutText diff == 1f");
+        if (diff == 1f) {
             int availableScreenWidth = viewWidth - dp(32f);
             float objectWidth = getTextCorrectWidth(nameTextView[1], nameTextView[1].getScaleX(), true);
             FrameLayout.LayoutParams nameTextLp = (FrameLayout.LayoutParams) nameTextView[1].getLayoutParams();
-            if(objectWidth < availableScreenWidth){
+            if (objectWidth < availableScreenWidth) {
                 nameTextLp.width = (int) Math.ceil(objectWidth);
-                Log.e("TextIssue","needLayoutText #1 objectWidth="+nameTextLp.width);
             } else {
-                Log.e("TextIssue","needLayoutText #2 availableScreenWidth="+availableScreenWidth);
                 nameTextLp.width = availableScreenWidth;
             }
             nameTextView[1].setLayoutParams(nameTextLp);
@@ -986,7 +935,7 @@ public class ProfileToolbarHelper {
 
             objectWidth = getTextCorrectWidth(onlineTextView[1], 1f, false);
             int onlineTextFinalWidth;
-            if(objectWidth < availableScreenWidth){
+            if (objectWidth < availableScreenWidth) {
                 onlineTextFinalWidth = LayoutHelper.WRAP_CONTENT;
             } else {
                 onlineTextFinalWidth = availableScreenWidth;
@@ -1001,7 +950,7 @@ public class ProfileToolbarHelper {
             return;
         }
 
-        int buttonsWidth = dp(ProfileToolbarHelper.TOOLBAR_TEXT_INITIAL_START_MARGIN + 8 + (40 + extra * (1.0f - mediaHeaderAnimationProgress)));
+        int buttonsWidth = dp(ProfileToolbarHelper.TOOLBAR_TEXT_INITIAL_START_MARGIN + 48);
         int minWidth = viewWidth - buttonsWidth;
 
         int width = (int) (viewWidth - buttonsWidth * Math.max(0.0f, 1.0f - (diff != 1.0f ? diff * 0.15f / (1.0f - diff) : 1.0f)) - nameTextView[1].getTranslationX());
@@ -1019,7 +968,7 @@ public class ProfileToolbarHelper {
         layoutParams = (FrameLayout.LayoutParams) onlineTextView[1].getLayoutParams();
         FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) mediaCounterTextView.getLayoutParams();
         int prevWidth = layoutParams.width;
-        layoutParams2.rightMargin = layoutParams.rightMargin = (int) Math.ceil(onlineTextView[1].getTranslationX() + dp(8) + dp(40) * (1.0f - diff)); //todo should remove it i guess
+        layoutParams2.rightMargin = layoutParams.rightMargin = (int) Math.ceil(onlineTextView[1].getTranslationX() + dp(8) + dp(40) * (1.0f - diff));
         if (width < width2) {
             layoutParams2.width = layoutParams.width = (int) Math.ceil(width);
         } else {
@@ -1109,10 +1058,15 @@ public class ProfileToolbarHelper {
         CrossfadeDrawable[] getPremiumCrossfadeDrawable();
 
         AudioPlayerAlert.ClippingTextViewSwitcher getMediaCounterTextView();
+
         void requestUpdateEmojiStatusDrawableColor(float progress);
+
         void requestCheckPhotoDescriptionAlpha();
+
         int requestGetSmallAvatarRoundRadius();
+
         int requestApplyPeerColor(int color, boolean actionBar, Boolean online);
+
         ProfileActivity.TopView getTopView();
     }
 }
