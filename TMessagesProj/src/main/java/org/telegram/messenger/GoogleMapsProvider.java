@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.telegram.contest.omid.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

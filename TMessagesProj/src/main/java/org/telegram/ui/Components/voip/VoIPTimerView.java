@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.voip.VoIPService;
 
 public class VoIPTimerView extends View {

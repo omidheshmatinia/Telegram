@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
 import org.telegram.PhoneFormat.PhoneFormat;
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;

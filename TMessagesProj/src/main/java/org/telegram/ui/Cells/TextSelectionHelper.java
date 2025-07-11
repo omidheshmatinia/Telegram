@@ -49,7 +49,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;

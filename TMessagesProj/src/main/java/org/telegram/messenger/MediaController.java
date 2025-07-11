@@ -75,6 +75,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.messenger.chromecast.ChromecastController;
 import org.telegram.messenger.chromecast.ChromecastFileServer;

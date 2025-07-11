@@ -17,7 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.ButtonBounce;

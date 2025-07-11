@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.LayoutHelper;

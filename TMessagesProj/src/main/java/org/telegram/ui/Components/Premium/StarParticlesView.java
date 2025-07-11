@@ -26,7 +26,7 @@ import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;

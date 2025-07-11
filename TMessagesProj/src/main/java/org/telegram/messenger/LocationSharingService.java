@@ -16,6 +16,7 @@ import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
 

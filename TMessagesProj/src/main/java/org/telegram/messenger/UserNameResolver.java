@@ -5,6 +5,7 @@ import android.util.LruCache;
 
 import com.google.android.exoplayer2.util.Consumer;
 
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;

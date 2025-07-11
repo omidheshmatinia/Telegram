@@ -20,7 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 

@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import androidx.collection.LongSparseArray;
 
 import org.telegram.SQLite.SQLiteCursor;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;

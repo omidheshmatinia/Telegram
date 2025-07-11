@@ -3,7 +3,7 @@ package org.telegram.ui.screens.profile;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 
 public enum ProfileToolbarButtonItem {
     Message(R.drawable.filled_message, R.string.Message),

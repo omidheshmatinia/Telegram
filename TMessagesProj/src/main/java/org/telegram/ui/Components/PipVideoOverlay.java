@@ -48,7 +48,7 @@ import com.google.android.exoplayer2.C;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.MediaController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.pip.source.IPipSourceDelegate;
 import org.telegram.messenger.pip.utils.PipPermissions;
 import org.telegram.messenger.pip.PipSource;

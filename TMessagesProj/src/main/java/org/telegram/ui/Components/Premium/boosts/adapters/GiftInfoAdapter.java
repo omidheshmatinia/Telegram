@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;

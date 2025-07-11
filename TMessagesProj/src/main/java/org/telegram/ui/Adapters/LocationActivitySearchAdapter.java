@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.GraySectionCell;

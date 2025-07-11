@@ -48,7 +48,7 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.pip.source.IPipSourceDelegate;
 import org.telegram.messenger.pip.utils.PipPermissions;
 import org.telegram.messenger.pip.PipSource;

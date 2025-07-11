@@ -9,7 +9,7 @@ import androidx.annotation.RawRes;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

@@ -65,7 +65,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.TopicsController;
 import org.telegram.messenger.Utilities;

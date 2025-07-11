@@ -35,7 +35,7 @@ import org.telegram.messenger.DispatchQueuePool;
 import org.telegram.messenger.DispatchQueuePoolBackground;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.utils.BitmapsCache;
 import org.telegram.ui.BubbleActivity;

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
+import org.telegram.contest.omid.R;
+
 public class ChatMessageSharedResources {
 
     public Context context;

@@ -49,6 +49,7 @@ import androidx.collection.LongSparseArray;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import org.json.JSONObject;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.messenger.support.SparseLongArray;
 import org.telegram.tgnet.ConnectionsManager;

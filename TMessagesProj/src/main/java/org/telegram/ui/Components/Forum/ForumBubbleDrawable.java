@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.ui.ActionBar.Theme;
 

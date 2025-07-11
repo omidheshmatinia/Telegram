@@ -32,7 +32,7 @@ import androidx.annotation.Nullable;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 

@@ -22,6 +22,7 @@ import androidx.collection.LongSparseArray;
 
 import com.google.android.exoplayer2.util.Log;
 
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;

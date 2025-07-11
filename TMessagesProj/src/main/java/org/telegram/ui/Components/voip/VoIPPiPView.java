@@ -36,7 +36,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.pip.source.IPipSourceDelegate;
 import org.telegram.messenger.pip.utils.PipPermissions;
 import org.telegram.messenger.pip.PipSource;

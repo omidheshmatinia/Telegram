@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 
 public class CounterDrawable extends Drawable {
 

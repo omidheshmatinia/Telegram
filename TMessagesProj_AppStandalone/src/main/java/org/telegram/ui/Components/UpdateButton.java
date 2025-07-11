@@ -65,7 +65,7 @@ public class UpdateButton extends IUpdateButton {
         textView = new TextView(context);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         textView.setTypeface(AndroidUtilities.bold());
-        textView.setText(LocaleController.getString(org.telegram.messenger.R.string.AppUpdateNow).toUpperCase());
+        textView.setText(LocaleController.getString(org.telegram.contest.omid.R.string.AppUpdateNow).toUpperCase());
         textView.setTextColor(0xffffffff);
         textView.setPadding(dp(30), 0, 0, 0);
         addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 0, 0, 0, 0));

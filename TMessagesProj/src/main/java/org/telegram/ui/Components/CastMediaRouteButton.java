@@ -22,7 +22,7 @@ import androidx.mediarouter.app.MediaRouteDialogFactory;
 import androidx.mediarouter.app.MediaRouteDynamicChooserDialog;
 import androidx.mediarouter.media.MediaRouteSelector;
 
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.ActionBar.Theme;
 
 public class CastMediaRouteButton extends MediaRouteButton {

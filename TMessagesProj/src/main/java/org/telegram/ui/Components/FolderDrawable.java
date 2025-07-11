@@ -14,7 +14,7 @@ import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.ActionBar.Theme;
 
 public class FolderDrawable extends Drawable {

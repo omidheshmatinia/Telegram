@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.LayoutHelper;

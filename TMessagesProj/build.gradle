@@ -203,7 +203,7 @@ android {
             buildConfigField "boolean", "BUILD_HOST_IS_WINDOWS", isWindows
         }
     }
-    namespace 'org.telegram.messenger'
+    namespace 'org.telegram.contest.omid'
 }
 
 

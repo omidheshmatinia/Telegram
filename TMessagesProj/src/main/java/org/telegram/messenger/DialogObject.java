@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;

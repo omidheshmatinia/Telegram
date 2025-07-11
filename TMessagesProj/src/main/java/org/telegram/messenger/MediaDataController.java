@@ -51,6 +51,8 @@ import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
 import org.telegram.SQLite.SQLitePreparedStatement;
+import org.telegram.contest.omid.BuildConfig;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
 import org.telegram.tgnet.ConnectionsManager;

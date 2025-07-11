@@ -28,6 +28,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
 import org.json.JSONObject;
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;

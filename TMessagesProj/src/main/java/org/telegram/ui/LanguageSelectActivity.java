@@ -28,7 +28,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;

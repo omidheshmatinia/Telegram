@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.browser.Browser;

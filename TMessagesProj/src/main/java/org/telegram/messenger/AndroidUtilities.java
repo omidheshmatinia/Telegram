@@ -139,6 +139,7 @@ import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
 import org.telegram.PhoneFormat.PhoneFormat;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
 import org.telegram.tgnet.ConnectionsManager;

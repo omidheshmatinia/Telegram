@@ -16,7 +16,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.ui.ActionBar.AlertDialog;

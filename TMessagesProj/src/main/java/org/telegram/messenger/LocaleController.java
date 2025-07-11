@@ -27,6 +27,7 @@ import android.util.Xml;
 
 import androidx.annotation.StringRes;
 
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.tgnet.Vector;
 import org.telegram.ui.Stars.StarsController;

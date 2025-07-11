@@ -18,6 +18,7 @@ import android.net.Uri;
 
 import com.carrotsearch.randomizedtesting.Xoroshiro128PlusRandom;
 
+import org.telegram.contest.omid.BuildConfig;
 import org.telegram.tgnet.ConnectionsManager;
 
 import java.io.File;

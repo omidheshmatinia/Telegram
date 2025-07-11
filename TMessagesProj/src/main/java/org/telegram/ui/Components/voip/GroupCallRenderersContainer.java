@@ -37,7 +37,7 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.pip.utils.PipUtils;
 import org.telegram.messenger.support.LongSparseIntArray;

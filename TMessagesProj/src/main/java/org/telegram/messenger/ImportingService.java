@@ -15,6 +15,8 @@ import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import org.telegram.contest.omid.R;
+
 public class ImportingService extends Service implements NotificationCenter.NotificationCenterDelegate {
 
     private NotificationCompat.Builder builder;

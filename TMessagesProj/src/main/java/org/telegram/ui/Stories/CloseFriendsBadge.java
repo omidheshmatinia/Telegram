@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 
 public class CloseFriendsBadge extends ImageView {

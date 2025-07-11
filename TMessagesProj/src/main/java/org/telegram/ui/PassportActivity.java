@@ -80,7 +80,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MrzRecognizer;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.PushListenerController;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.SRPHelper;
 import org.telegram.messenger.SecureDocument;
 import org.telegram.messenger.SecureDocumentKey;

@@ -2,6 +2,7 @@ package org.telegram.messenger;
 
 import com.google.android.exoplayer2.util.Consumer;
 
+import org.telegram.contest.omid.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;

@@ -65,7 +65,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.SparseLongArray;
 import org.telegram.tgnet.TLRPC;

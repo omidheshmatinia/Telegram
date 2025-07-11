@@ -40,6 +40,7 @@ import android.widget.Toast;
 import androidx.collection.LongSparseArray;
 
 import org.telegram.SQLite.SQLiteCursor;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLRPC;

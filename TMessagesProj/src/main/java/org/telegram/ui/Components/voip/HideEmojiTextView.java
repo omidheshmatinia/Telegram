@@ -9,7 +9,7 @@ import android.graphics.Color;
 import android.graphics.RectF;
 import android.view.View;
 import android.widget.TextView;
-import org.telegram.messenger.R;
+import org.telegram.contest.omid.R;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;

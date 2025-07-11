@@ -64,6 +64,7 @@ import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.IconCompat;
 
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.messenger.voip.VoIPGroupNotification;
 import org.telegram.tgnet.ConnectionsManager;

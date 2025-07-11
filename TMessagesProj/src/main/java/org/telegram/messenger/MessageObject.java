@@ -43,6 +43,7 @@ import androidx.collection.LongSparseArray;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.PhoneFormat.PhoneFormat;
+import org.telegram.contest.omid.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.tgnet.ConnectionsManager;
