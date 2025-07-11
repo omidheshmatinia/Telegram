@@ -1,7 +1,6 @@
 package org.telegram.ui.screens.profile;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.ui.ProfileActivity.add_photo;
 import static org.telegram.ui.ProfileActivity.delete_avatar;
 import static org.telegram.ui.ProfileActivity.edit_avatar;
@@ -17,7 +16,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -32,16 +30,11 @@ import androidx.core.graphics.ColorUtils;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.NotificationsController;
-import org.telegram.contest.omid.R;
 import org.telegram.tgnet.TLRPC;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -49,7 +42,6 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AudioPlayerAlert;
 import org.telegram.ui.Components.BackupImageView;
@@ -70,7 +62,6 @@ import org.telegram.ui.Stars.ProfileGiftsView;
 import org.telegram.ui.Stories.ProfileStoriesView;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ProfileToolbarHelper {
     public static final int MAX_PROFILE_IMAGE_CIRCLE_SIZE = dp(84);
@@ -297,7 +288,7 @@ public class ProfileToolbarHelper {
         }
     }
 
-    private ViewPagerBlurredBottom viewPagerBlurredBottom;
+    public ViewPagerBlurredBottom viewPagerBlurredBottom;
 
     public void setupToolbarButtons(Context context, Theme.ResourcesProvider resourcesProvider, SizeNotifierFrameLayout masterView, ActionBarMenuItem otherItem, ProfileToolbarButtonsRowLayout.ToolbarButtonClickCallback clickListener) {
 
@@ -418,10 +409,8 @@ public class ProfileToolbarHelper {
         final RecyclerListView listView = referenceCallback.getListView();
         float threshHOld = isPulledDown ? THRESH_HOLD_FOR_AUTO_COLLAPSE : THRESH_HOLD_FOR_AUTO_EXPAND;
         if (allowPullingDown && (openingAvatar || expandProgress >= threshHOld)) {
-            if (!expandAnimator.isRunning()) {
-                if (!isPulledDown) {
-                    isPulledDown = startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, isChatNoForward);
-                }
+            if (!expandAnimator.isRunning() && !isPulledDown) {
+                isPulledDown = startAutoExpand(otherItem, searchItem, expandAnimator, topView, expandAnimatorValues, imageUpdater, isChatNoForward);
             }
             ViewGroup.LayoutParams params = avatarsViewPager.getLayoutParams();
             params.width = listView.getMeasuredWidth();
@@ -446,7 +435,7 @@ public class ProfileToolbarHelper {
                 fireUpdateCollectibleHintCallback();
             }
         } else {
-            if (isPulledDown) {
+            if (isPulledDown && !expandAnimator.isRunning()) {
                 isPulledDown = startAutoCollapse(otherItem, searchItem, expandAnimator, topView, imageUpdater, expandAnimatorValues, scrolling, isInLandscapeMode, doNotSetForeground);
             }
             avatarContainer.setScaleX(avatarScale);
@@ -611,7 +600,7 @@ public class ProfileToolbarHelper {
             searchItem.setEnabled(!scrolling);
         }
         overlaysView.setOverlaysVisible(false, 1f);
-        avatarsViewPagerIndicatorView.refreshVisibility(1f);
+        avatarsViewPagerIndicatorView.setVisibility(View.GONE);
         expandAnimator.cancel();
         avatarImage.getImageReceiver().setAllowStartAnimation(true);
         avatarImage.getImageReceiver().startAnimation();
@@ -689,7 +678,7 @@ public class ProfileToolbarHelper {
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
         overlaysView.setOverlaysVisible();
         overlaysView.setAlphaValue(1f, false);
-        avatarsViewPagerIndicatorView.refreshVisibility(0f);
+        avatarsViewPagerIndicatorView.setVisibility(View.VISIBLE);
         avatarsViewPager.setCreateThumbFromParent(true);
         if (avatarsViewPager.getAdapter() != null) {
             avatarsViewPager.getAdapter().notifyDataSetChanged();
@@ -910,7 +899,6 @@ public class ProfileToolbarHelper {
 
     public void needLayoutText(float diff, float extraHeight, float mediaHeaderAnimationProgress) {
         final AudioPlayerAlert.ClippingTextViewSwitcher mediaCounterTextView = referenceCallback.getMediaCounterTextView();
-        final ProfileActivity.PagerIndicatorView avatarsViewPagerIndicatorView = referenceCallback.getIndicatorView();
 
         FrameLayout.LayoutParams layoutParams;
         float scale = nameTextView[1].getScaleX();

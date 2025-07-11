@@ -137,8 +137,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -308,8 +306,6 @@ import org.telegram.ui.bots.ChannelAffiliateProgramsFragment;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
 import org.telegram.ui.screens.profile.ProfileAvatarContainer;
 import org.telegram.ui.screens.profile.ProfileOverlaysView;
-import org.telegram.ui.screens.profile.ProfileToolbarButtonItem;
-import org.telegram.ui.screens.profile.ProfileToolbarButtonsRowLayout;
 import org.telegram.ui.screens.profile.ProfileToolbarHelper;
 
 import java.io.BufferedInputStream;
@@ -1617,6 +1613,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     invalidateIndicatorRect(prevPage != realPosition);
                     prevPage = realPosition;
                     updateAvatarItems();
+
                 }
 
                 @Override
