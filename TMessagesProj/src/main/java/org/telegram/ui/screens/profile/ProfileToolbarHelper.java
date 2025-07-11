@@ -553,7 +553,8 @@ public class ProfileToolbarHelper {
             searchItem.setEnabled(false);
         }
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
-        overlaysView.setOverlaysVisible(true, 0f);
+        overlaysView.setOverlaysVisible();
+        overlaysView.setAlphaValue(1f, false);
         avatarsViewPagerIndicatorView.refreshVisibility(0f);
         avatarsViewPager.setCreateThumbFromParent(true);
         if (avatarsViewPager.getAdapter() != null) {
