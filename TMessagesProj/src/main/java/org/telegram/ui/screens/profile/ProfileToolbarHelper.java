@@ -90,6 +90,7 @@ public class ProfileToolbarHelper {
     private float avatarY = 0f;
     public boolean isVideoCallItemVisible = false;
     public boolean isCallItemVisible = false;
+    public boolean isMyProfile = false;
 
     private final ProfileActivityReferenceCallback referenceCallback;
 
@@ -97,11 +98,12 @@ public class ProfileToolbarHelper {
         this.referenceCallback = callback;
     }
 
-    public void checkVideoCallAndCallVisibility(TLRPC.UserFull userInfo) {
+    public void checkVideoCallAndCallVisibility(TLRPC.UserFull userInfo, boolean myProfile) {
         if (userInfo != null && userInfo.phone_calls_available) {
             isCallItemVisible = true;
             isVideoCallItemVisible = userInfo.video_calls_available;
         }
+        isMyProfile = myProfile;
     }
 
     public void setupGifts(){
@@ -313,6 +315,9 @@ public class ProfileToolbarHelper {
         }
         if(isVideoCallItemVisible) {
             items.add(ProfileToolbarButtonItem.Video);
+        }
+        if(isMyProfile) {
+            items.add(ProfileToolbarButtonItem.AddStory);
         }
         if(otherItem.hasSubItem(report)){
             items.add(ProfileToolbarButtonItem.Report);

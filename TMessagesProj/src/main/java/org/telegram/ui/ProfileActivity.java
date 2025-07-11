@@ -3119,32 +3119,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 final int finalA = a;
                 bottomButton[a].setOnClickListener(v -> {
                     if (finalA == 0 && !sharedMediaLayout.isActionModeShown()) {
-                        if (!getMessagesController().storiesEnabled()) {
-                            showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_STORIES, true));
-                            return;
-                        }
-                        getMessagesController().getMainSettings().edit().putBoolean("story_keep", true).apply();
-                        StoryRecorder.getInstance(getParentActivity(), getCurrentAccount())
-                                .closeToWhenSent(new StoryRecorder.ClosingViewProvider() {
-                                    @Override
-                                    public void preLayout(long dialogId, Runnable runnable) {
-                                        avatarImage.setHasStories(needInsetForStories());
-                                        if (dialogId == getDialogId()) {
-                                            collapseAvatarInstant();
-                                        }
-                                        AndroidUtilities.runOnUIThread(runnable, 30);
-                                    }
-
-                                    @Override
-                                    public StoryRecorder.SourceView getView(long dialogId) {
-                                        if (dialogId != getDialogId()) {
-                                            return null;
-                                        }
-                                        updateAvatarRoundRadius();
-                                        return StoryRecorder.SourceView.fromAvatarImage(avatarImage, ChatObject.isForum(currentChat));
-                                    }
-                                })
-                                .open(null);
+                        onAddStoriesClicked();
                     } else {
                         final long dialogId = getUserConfig().getClientUserId();
                         if (applyBulletin != null) {
@@ -5065,9 +5040,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 case Stop:
                     break;
                 case Gift:
-                    toolbarGiftItemClicked(); //todo when to show gift item
+                    toolbarGiftItemClicked();
                     break;
                 case AddStory:
+                    onAddStoriesClicked();
                     break;
                 case LiveStream:
                     break;
@@ -5245,6 +5221,35 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
 
         return fragmentView;
+    }
+
+    private void onAddStoriesClicked() {
+        if (!getMessagesController().storiesEnabled()) {
+            showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_STORIES, true));
+            return;
+        }
+        getMessagesController().getMainSettings().edit().putBoolean("story_keep", true).apply();
+        StoryRecorder.getInstance(getParentActivity(), getCurrentAccount())
+                .closeToWhenSent(new StoryRecorder.ClosingViewProvider() {
+                    @Override
+                    public void preLayout(long dialogId, Runnable runnable) {
+                        avatarImage.setHasStories(needInsetForStories());
+                        if (dialogId == getDialogId()) {
+                            collapseAvatarInstant();
+                        }
+                        AndroidUtilities.runOnUIThread(runnable, 30);
+                    }
+
+                    @Override
+                    public StoryRecorder.SourceView getView(long dialogId) {
+                        if (dialogId != getDialogId()) {
+                            return null;
+                        }
+                        updateAvatarRoundRadius();
+                        return StoryRecorder.SourceView.fromAvatarImage(avatarImage, ChatObject.isForum(currentChat));
+                    }
+                })
+                .open(null);
     }
 
     private void toolbarShareButtonClicked() {
@@ -9726,6 +9731,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (user == null) {
                 return;
             }
+            profileToolbarHelper.checkVideoCallAndCallVisibility(userInfo, myProfile);
             if (UserObject.isUserSelf(user)) {
                 editItemVisible = myProfile;
                 otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
@@ -9744,7 +9750,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (user.bot && user.bot_can_edit) {
                     editItemVisible = true;
                 }
-                profileToolbarHelper.checkVideoCallAndCallVisibility(userInfo);
                 if (isBot || getContactsController().contactsDict.get(userId) == null) {
                     if (MessagesController.isSupportUser(user)) {
                         if (userBlocked) {
