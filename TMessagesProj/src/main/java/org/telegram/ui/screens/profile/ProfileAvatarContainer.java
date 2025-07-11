@@ -24,10 +24,12 @@ public class ProfileAvatarContainer extends FrameLayout {
     private final CircularForegroundView blackForegroundView;
     private final AvatarCircularBlurForeground blurredView;
     private final CurvedAnimationLayout curvedAnimationLayout;
+    private final ProfileActivity.AvatarImageView imageView;
 
     public ProfileAvatarContainer(@NonNull Context context, ProfileActivity.AvatarImageView avatarImage, Theme.ResourcesProvider resourceProvider) {
         super(context);
         this.blackForegroundView = new CircularForegroundView(context, Color.BLACK);
+        this.imageView =avatarImage;
         blackForegroundView.setAlpha(0f);
         FrameLayout.LayoutParams lp = LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT);
         lp.setMargins(1, 1, 1, 1); // to prevent anti alias issue at corners
@@ -42,6 +44,8 @@ public class ProfileAvatarContainer extends FrameLayout {
     public void updateProgress(float progress) {
         final float START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD = 0.6f;
         final float START_SHOWING_BLACK_WHEN_COLLAPSING_THRESHOLD = 0.3f;
+
+        imageView.setRoundRadius(ProfileToolbarHelper.MAX_PROFILE_IMAGE_CIRCLE_SIZE);
 
         float alphaProgress = Math.max(0f, (progress - START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD)) / (1 - START_HIDING_BLACK_WHEN_EXPANDING_THRESHOLD); //start removing black foreground when progress > 0.4
         alphaProgress = Math.min(1f, alphaProgress * (1 + START_SHOWING_BLACK_WHEN_COLLAPSING_THRESHOLD));  //start showing black foreground when progress < 0.91
